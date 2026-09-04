@@ -58,6 +58,22 @@
     --purple-soft: rgba(220,31,57,.10);
   }
 
+  /* ---------- Theme-toggle circular reveal (View Transitions API) ---------- */
+  ::view-transition-old(root),
+  ::view-transition-new(root){
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-old(root){ z-index: 1; }
+  ::view-transition-new(root){ z-index: 2; }
+  @keyframes theme-reveal{
+    from{ clip-path: circle(0px at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
+    to{ clip-path: circle(var(--reveal-radius, 150%) at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
+  }
+  ::view-transition-new(root){
+    animation: theme-reveal .65s cubic-bezier(.65,0,.35,1);
+  }
+
   *{ box-sizing: border-box; margin:0; padding:0; }
   html{ scroll-behavior: smooth; }
 
@@ -108,6 +124,40 @@
   @media (max-width: 480px){
     .theme-toggle{ top: 14px; left: 14px; width: 38px; height: 38px; }
     .theme-toggle svg{ width:17px; height:17px; }
+  }
+
+  /* ---------- Sticky contact button ---------- */
+  .sticky-contact{
+    position: fixed;
+    bottom: 22px; left: 20px;
+    z-index: 80;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none;
+    box-shadow: 0 10px 28px rgba(79,110,247,.45);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .sticky-contact:hover{ transform: translateY(-2px) scale(1.05); }
+  .sticky-contact:active{ transform: scale(.95); }
+  .sticky-contact svg{ width:28px; height:28px; display:block; position:relative; z-index:1; }
+  .sticky-contact-ring{
+    position:absolute; inset:0;
+    border-radius:50%;
+    box-shadow: 0 0 0 0 rgba(79,110,247,.55);
+    animation: sticky-pulse 2.6s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes sticky-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(79,110,247,.5); }
+    70%{ box-shadow: 0 0 0 16px rgba(79,110,247,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(79,110,247,0); }
+  }
+  @media (max-width: 480px){
+    .sticky-contact{ bottom: 16px; left: 16px; width: 48px; height: 48px; }
+    .sticky-contact svg{ width:24px; height:24px; }
   }
 
   /* ---------- Plan confirm modal ---------- */
@@ -164,6 +214,61 @@
   .confirm-yes:active{ transform: scale(.97); }
   .confirm-no{ background: transparent; color: var(--text-dim); }
   .confirm-no:hover{ background: var(--line-soft); color: var(--text); }
+
+  .freetest-overlay{
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
+  }
+  .freetest-overlay.open{ opacity:1; visibility:visible; }
+  .freetest-overlay.open .confirm-modal{ transform: translateY(0) scale(1); opacity:1; }
+
+  .freetest-options{
+    margin-top: 20px;
+    display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+  }
+  .freetest-option{
+    position:relative;
+    overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px 10px 16px;
+    cursor:pointer;
+    font-family:inherit;
+    transition: border-color .15s ease, transform .15s ease, background-color .15s ease, box-shadow .15s ease;
+  }
+  .freetest-option::before{
+    content:"";
+    position:absolute; top:0; right:0; left:0; height:3px;
+    background: var(--tone);
+  }
+  .freetest-option:hover{ transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,.14); }
+  .freetest-option:active{ transform: scale(.96); }
+  .freetest-option[data-tone="purple"]{ --tone: var(--purple); --tone-soft: var(--purple-soft); }
+  .freetest-option[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
+  .freetest-option:hover{ border-color: var(--tone); background: var(--tone-soft); }
+  .freetest-option-icon{
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:19px; font-weight:800; line-height:1;
+    background: var(--tone-soft); color: var(--tone);
+    margin-top: 3px;
+  }
+  .freetest-option-icon svg{ width:19px; height:19px; display:block; }
+  .freetest-option-label{ font-size:14px; font-weight:800; color: var(--text); margin-top:2px; }
+  .freetest-option-sub{ font-size:11px; color: var(--text-faint); line-height:1.5; }
+
+  .freetest-overlay .confirm-no{
+    width:100%; margin-top:18px; padding-top:16px;
+    border-top: 1px solid var(--line-soft);
+    border-radius:0;
+  }
 
   /* ---------- Ambient floating orbs ---------- */
   .bg-orbs{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
@@ -284,113 +389,42 @@
   }
   @keyframes draw-w{ to{ stroke-dashoffset: 0; } }
 
-  /* ---------- Promo banner ---------- */
-  .promo-banner{
-    position:relative;
-    isolation:isolate;
-    overflow:hidden;
+  /* ---------- How it works ---------- */
+  .how-it-works{
     max-width: 640px;
-    margin: 0 auto 34px;
-    background: linear-gradient(115deg, #ff3b4e 0%, var(--purple) 30%, #a3121f 65%, #ff3b4e 100%);
-    background-size: 300% 300%;
-    animation: banner-gradient 6s ease infinite, banner-glow 2.4s ease-in-out infinite;
+    margin: 0 auto 30px;
+    background: var(--surface);
+    border: 1px solid var(--line);
     border-radius: 20px;
-    padding: 24px 24px 26px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+    padding: 22px 20px;
+  }
+  .how-title{
     text-align:center;
-    gap: 12px;
+    font-size: 14.5px; font-weight: 800; color: var(--text);
+    margin-bottom: 18px;
   }
-  @keyframes banner-gradient{
-    0%{ background-position: 0% 50%; }
-    50%{ background-position: 100% 50%; }
-    100%{ background-position: 0% 50%; }
+  .how-steps{
+    display:flex; flex-wrap:wrap; justify-content:center;
+    gap: 10px;
   }
-  @keyframes banner-glow{
-    0%,100%{ box-shadow: 0 8px 30px rgba(255,59,78,.35), 0 0 0 1px rgba(255,255,255,.06) inset; }
-    50%{ box-shadow: 0 8px 46px rgba(255,59,78,.6), 0 0 0 1px rgba(255,255,255,.1) inset; }
+  .how-step{
+    flex: 1 1 120px;
+    max-width: 150px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap: 8px;
   }
-  .promo-banner::before{
-    content:"";
-    position:absolute; z-index:-1; inset:0;
-    background:
-      radial-gradient(220px 220px at 10% -20%, rgba(255,255,255,.25), transparent 60%),
-      radial-gradient(220px 220px at 100% 120%, rgba(255,255,255,.16), transparent 60%);
+  .how-num{
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--blue-soft); color: var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13.5px; font-weight: 800; line-height:1;
+    flex-shrink:0;
   }
-  .promo-banner::after{
-    content:"✦ ✧ ✦ ✧ ✦";
-    position:absolute; z-index:-1; inset:0;
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 0 10px;
-    color: rgba(255,255,255,.18);
-    font-size: 15px;
-    letter-spacing: 30px;
-    animation: sparkle-twinkle 3.2s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes sparkle-twinkle{
-    0%,100%{ opacity:.4; }
-    50%{ opacity:1; }
-  }
+  .how-step p{ font-size: 12px; color: var(--text-dim); line-height: 1.6; }
 
-  .promo-badge{
-    position:relative;
-    overflow:hidden;
-    display:inline-flex; align-items:center; gap:6px;
-    background: rgba(255,255,255,.2);
-    border: 1px solid rgba(255,255,255,.35);
-    color:#fff; font-size:13px; font-weight:800;
-    padding: 6px 16px; border-radius:999px; line-height:1;
-    box-shadow: 0 4px 14px rgba(0,0,0,.15);
-    animation: badge-pulse 1.8s ease-in-out infinite;
-  }
-  .promo-badge svg{ width:14px; height:14px; flex-shrink:0; }
-  .promo-badge::after{
-    content:"";
-    position:absolute; top:0; bottom:0; left:-60%;
-    width: 40%;
-    background: linear-gradient(115deg, transparent, rgba(255,255,255,.55), transparent);
-    animation: badge-shine 2.6s ease-in-out infinite;
-  }
-  @keyframes badge-shine{
-    0%{ left:-60%; }
-    45%{ left:130%; }
-    100%{ left:130%; }
-  }
-
-  .promo-text{ position:relative; color:#fff; font-size:13.5px; font-weight:500; line-height:1.8; max-width:440px; }
-  .promo-text strong{ font-weight:800; }
-
-  .promo-timer{ position:relative; display:flex; align-items:center; gap:8px; margin-top:4px; }
-  .t-unit{
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-    background: rgba(255,255,255,.16);
-    border: 1px solid rgba(255,255,255,.25);
-    border-radius: 12px;
-    padding: 9px 13px;
-    min-width: 54px;
-    box-shadow: 0 3px 10px rgba(0,0,0,.12);
-  }
-  .t-num{
-    display:inline-block;
-    color:#fff; font-size:20px; font-weight:800;
-    font-variant-numeric: tabular-nums; line-height:1;
-  }
-  .t-num.tick{ animation: t-pop .4s ease; }
-  @keyframes t-pop{
-    0%{ transform: scale(1); }
-    35%{ transform: scale(1.28); text-shadow: 0 0 12px rgba(255,255,255,.8); }
-    100%{ transform: scale(1); }
-  }
-  .t-label{ color:rgba(255,255,255,.8); font-size:10px; font-weight:600; margin-top:3px; }
-  .t-colon{ color:rgba(255,255,255,.55); font-size:19px; font-weight:800; margin-top:-14px; animation: colon-blink 1s ease-in-out infinite; }
-  @keyframes colon-blink{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
-
-  @media (max-width: 420px){
-    .t-unit{ min-width: 46px; padding: 8px 9px; }
-    .t-num{ font-size:17px; }
-    .promo-banner::after{ letter-spacing: 14px; font-size:12px; }
+  @media (max-width: 480px){
+    .how-steps{ gap: 14px 8px; }
+    .how-step{ flex: 1 1 40%; max-width: 46%; }
   }
 
   /* ---------- Tier tabs (the "menu") ---------- */
@@ -489,69 +523,54 @@
 
   .plan-list{ list-style:none; display:flex; flex-direction:column; }
   .plan-row{
-    display:flex; align-items:center; justify-content: space-between; gap: 10px;
-    padding: 15px 10px; border-top: 1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:space-between; gap: 12px;
+    padding: 16px 6px; border-top: 1px solid var(--line-soft);
     border-radius: 10px;
     cursor: pointer;
-    transition: background .15s ease, box-shadow .25s ease, transform .15s ease;
+    transition: background .15s ease, box-shadow .25s ease;
   }
   .plan-row:first-child{ border-top:none; }
   .plan-row:hover{ background: var(--line-soft); }
-  .plan-row:active{ transform: scale(.98); }
 
   .plan-row.selected{
     background: var(--tone-soft);
     border-top-color: transparent;
-    box-shadow: 0 0 0 1.5px var(--tone), 0 0 18px 3px var(--tone-soft);
-    animation: row-glow 2.2s ease-in-out infinite;
+    box-shadow: 0 0 0 1px var(--tone);
   }
   .plan-row.selected + .plan-row{ border-top-color: transparent; }
   .plan-row.selected .plan-gb,
   .plan-row.selected .price-num{ color: var(--tone); }
-  @keyframes row-glow{
-    0%,100%{ box-shadow: 0 0 0 1.5px var(--tone), 0 0 14px 2px var(--tone-soft); }
-    50%{ box-shadow: 0 0 0 1.5px var(--tone), 0 0 24px 6px var(--tone-soft); }
-  }
 
-  .plan-left{ display:flex; align-items:center; gap:10px; min-width:0; }
-  .plan-gb{ font-size: 15.5px; font-weight: 600; color: var(--text); white-space:nowrap; }
+  .plan-left{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .plan-gb{ font-size: 15px; font-weight: 600; color: var(--text); white-space:nowrap; }
   .badge{
     display:inline-block;
-    font-size: 11px; font-weight: 700; padding: 4px 9px; line-height: 1; border-radius: 999px;
+    font-size: 10.5px; font-weight: 700; padding: 3px 8px; line-height: 1.4; border-radius: 999px;
     background: var(--tone-soft); color: var(--tone); white-space:nowrap;
-    animation: badge-pulse 2.6s ease-in-out infinite;
   }
-  @keyframes badge-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.07); } }
 
   .plan-price{
-    display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-    font-size: 15.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space:nowrap;
+    display:flex; align-items:baseline; gap:7px;
+    font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space:nowrap;
+    flex-shrink:0;
   }
-  .plan-price small{ font-weight: 500; color: var(--text-dim); font-size: 12px; margin-right: 3px; }
-  .price-old{
-    font-size: 11.5px; font-weight: 500; color: var(--text-faint);
-    text-decoration: line-through;
-  }
-  .price-new{ display:flex; align-items:baseline; }
-
+  .plan-price small{ font-weight: 500; color: var(--text-dim); font-size: 11.5px; margin-right: 3px; }
   /* ---------- Unlimited plan rows (used inside the "نامحدود" tab panel) ---------- */
   .unlimited-list{ list-style:none; display:flex; flex-direction:column; gap: 10px; }
   .unlimited-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding: 15px 16px; border-radius: 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding: 16px 16px; border-radius: 14px;
     background: var(--purple-soft);
     cursor: pointer;
     transition: transform .15s ease, box-shadow .25s ease;
   }
   .unlimited-row:hover{ transform: translateY(-1px); }
-  .unlimited-row:active{ transform: scale(.98); }
   .unlimited-row.selected{
-    box-shadow: 0 0 0 1.5px var(--purple), 0 0 18px 3px var(--purple-soft);
-    animation: row-glow 2.2s ease-in-out infinite;
+    box-shadow: 0 0 0 1px var(--purple);
   }
-  .unlimited-left{ display:flex; align-items:center; gap:9px; }
-  .unlimited-name{ font-size: 15px; font-weight: 700; color: var(--text); }
-  .badge--unlimited{ background: var(--purple); color:#fff; animation: badge-pulse 2.6s ease-in-out infinite; }
+  .unlimited-left{ display:flex; align-items:center; gap:8px; }
+  .unlimited-name{ font-size: 14.5px; font-weight: 700; color: var(--text); }
+  .badge--unlimited{ background: var(--purple); color:#fff; }
   .unlimited-row .plan-price{ color: var(--purple); }
 
   /* ---------- Platform compatibility strip ---------- */
@@ -772,6 +791,9 @@
     .cta-box{ padding: 36px 22px; }
     .cta-btn{ width:100%; justify-content:center; }
     .tier{ padding: 24px 18px 20px; }
+    .plan-row{ padding: 13px 6px; gap:6px; }
+    .plan-gb{ font-size: 14px; }
+    .plan-price{ font-size: 14px; }
     .platforms-list{ gap: 6px; }
     .platform-item{ padding: 8px 11px 8px 13px; gap:5px; font-size: 11px; }
     .platform-icon{ width: 22px; height: 22px; }
@@ -820,6 +842,11 @@
   <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 6.8 6.8 0 0 0 20 14.5Z"/></svg>
 </button>
 
+<a class="sticky-contact" href="https://t.me/WaliAdmin" target="_blank" rel="noopener" aria-label="پشتیبانی مستقیم در تلگرام">
+  <span class="sticky-contact-ring" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v3a2 2 0 0 0 2 2h1v-6H5a1 1 0 0 0-1 1Z"/><path d="M20 13v3a2 2 0 0 1-2 2h-1v-6h1a1 1 0 0 1 1 1Z"/><path d="M15 18.5a3 3 0 0 1-3 1.5h-1"/></svg>
+</a>
+
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
     <span class="confirm-icon">
@@ -834,6 +861,31 @@
       </button>
       <button class="confirm-btn confirm-no" id="confirmNoBtn" type="button">نه، بازگشت</button>
     </div>
+  </div>
+</div>
+
+<div class="freetest-overlay" id="freetestOverlay">
+  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="freetestTitle">
+    <span class="confirm-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+    </span>
+    <p class="confirm-title" id="freetestTitle">تست رایگان کدوم سرویس رو می‌خوای؟</p>
+    <p class="confirm-sub">یکی از دو نوع سرویس رو انتخاب کن تا پیامش برات آماده بشه.</p>
+    <div class="freetest-options">
+      <button class="freetest-option" id="freetestUnlimited" type="button" data-tone="purple">
+        <span class="freetest-option-icon">∞</span>
+        <span class="freetest-option-label">نامحدود</span>
+        <span class="freetest-option-sub">بدون محدودیت حجم</span>
+      </button>
+      <button class="freetest-option" id="freetestVolume" type="button" data-tone="blue">
+        <span class="freetest-option-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h2v-4H4v4Zm5 0h2V10H9v10Zm5 0h2V4h-2v16Zm5 0h2v-8h-2v8Z"/></svg>
+        </span>
+        <span class="freetest-option-label">حجمی</span>
+        <span class="freetest-option-sub">بر اساس گیگابایت</span>
+      </button>
+    </div>
+    <button class="confirm-btn confirm-no" id="freetestCancelBtn" type="button">انصراف</button>
   </div>
 </div>
 
@@ -889,24 +941,29 @@
     </svg>
   </div>
 
-  <div class="promo-banner">
-    <span class="promo-badge">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 11-14h-7l0-6Z"/></svg>
-      ۲۰٪ تخفیف
-    </span>
-    <p class="promo-text">به مناسبت طراحی جدید سایت، تا پایان <strong>۱۳ شهریور</strong> همه‌ی پلن‌ها <strong>۲۰٪ تخفیف</strong> دارن</p>
-    <div class="promo-timer" id="promoTimer" aria-live="polite">
-      <div class="t-unit"><span class="t-num" id="tSeconds">۰۰</span><span class="t-label">ثانیه</span></div>
-      <span class="t-colon">:</span>
-      <div class="t-unit"><span class="t-num" id="tMinutes">۰۰</span><span class="t-label">دقیقه</span></div>
-      <span class="t-colon">:</span>
-      <div class="t-unit"><span class="t-num" id="tHours">۰۰</span><span class="t-label">ساعت</span></div>
-      <span class="t-colon">:</span>
-      <div class="t-unit"><span class="t-num" id="tDays">۰۰</span><span class="t-label">روز</span></div>
-    </div>
-  </div>
-
   <main class="plans-section">
+
+    <div class="how-it-works">
+      <p class="how-title">چطور سفارش بدم؟</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <span class="how-num">۱</span>
+          <p>پلن مدنظرت رو پیدا کن</p>
+        </div>
+        <div class="how-step">
+          <span class="how-num">۲</span>
+          <p>روی همون پلن کلیک کن</p>
+        </div>
+        <div class="how-step">
+          <span class="how-num">۳</span>
+          <p>توی پنجره «بله» رو بزن</p>
+        </div>
+        <div class="how-step">
+          <span class="how-num">۴</span>
+          <p>پیام آماده رو برای ادمین بفرست</p>
+        </div>
+      </div>
+    </div>
 
     <p class="tabs-intro">مدت پلن رو انتخاب کن تا فقط همون قیمت‌ها رو ببینی</p>
     <div class="tabs-wrap">
@@ -932,27 +989,27 @@
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۵۰ گیگ</span><span class="badge">محبوب</span></span>
-            <span class="plan-price"><s class="price-old">۲۷۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="216000">۲۱۶,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="270000">۲۷۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۵۲۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="416000">۴۱۶,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="520000">۵۲۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۷۹۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="632000">۶۳۲,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="790000">۷۹۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۰۵۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="840000">۸۴۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1050000">۱,۰۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۳۰۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1040000">۱,۰۴۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1300000">۱,۳۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۳۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۵۵۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1240000">۱,۲۴۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1550000">۱,۵۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
       </section>
@@ -967,35 +1024,35 @@
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۵۰ گیگ</span><span class="badge">جدید</span></span>
-            <span class="plan-price"><s class="price-old">۳۸۵,۰۰۰</s><span class="price-new"><span class="price-num" data-value="308000">۳۰۸,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="385000">۳۸۵,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۶۰۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="480000">۴۸۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="600000">۶۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۸۸۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="704000">۷۰۴,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="880000">۸۸۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۰۰ گیگ</span><span class="badge">اقتصادی</span></span>
-            <span class="plan-price"><s class="price-old">۱,۱۲۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="896000">۸۹۶,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1120000">۱,۱۲۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۳۶۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1088000">۱,۰۸۸,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1360000">۱,۳۶۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۳۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۶۰۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1280000">۱,۲۸۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1600000">۱,۶۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۳۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۸۵۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1480000">۱,۴۸۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1850000">۱,۸۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۴۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۲,۰۹۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1672000">۱,۶۷۲,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="2090000">۲,۰۹۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
       </section>
@@ -1010,39 +1067,39 @@
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۰۰ گیگ</span><span class="badge">جدید</span></span>
-            <span class="plan-price"><s class="price-old">۷۲۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="576000">۵۷۶,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="720000">۷۲۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۹۵۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="760000">۷۶۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="950000">۹۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۰۰ گیگ</span><span class="badge">پرفروش</span></span>
-            <span class="plan-price"><s class="price-old">۱,۲۰۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="960000">۹۶۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1200000">۱,۲۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۲۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۴۴۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1152000">۱,۱۵۲,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1440000">۱,۴۴۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۳۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۶۸۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1344000">۱,۳۴۴,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1680000">۱,۶۸۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۳۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۱,۹۲۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1536000">۱,۵۳۶,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="1920000">۱,۹۲۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۴۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۲,۱۶۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1728000">۱,۷۲۸,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="2160000">۲,۱۶۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۴۵۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۲,۴۰۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="1920000">۱,۹۲۰,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="2400000">۲,۴۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۵۰۰ گیگ</span></span>
-            <span class="plan-price"><s class="price-old">۲,۶۴۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="2112000">۲,۱۱۲,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="2640000">۲,۶۴۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
       </section>
@@ -1060,13 +1117,13 @@
               <span class="unlimited-name">تک‌کاربره</span>
               <span class="badge badge--unlimited">ویژه</span>
             </span>
-            <span class="plan-price"><s class="price-old">۳۴۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="272000">۲۷۲,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="340000">۳۴۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="unlimited-row">
             <span class="unlimited-left">
               <span class="unlimited-name">دو کاربره</span>
             </span>
-            <span class="plan-price"><s class="price-old">۴۳۰,۰۰۰</s><span class="price-new"><span class="price-num" data-value="344000">۳۴۴,۰۰۰</span><small>تومان</small></span></span>
+            <span class="plan-price"><span class="price-num" data-value="430000">۴۳۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
       </section>
@@ -1387,14 +1444,37 @@
   // ---------- theme toggle ----------
   var themeToggleBtn = document.getElementById('themeToggle');
   var themeManuallySet = false;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function applyThemeSwap(next){
+    document.documentElement.setAttribute('data-theme', next);
+    var active = document.querySelector('.tab.active');
+    if(active) moveIndicator(active);
+  }
+
   if(themeToggleBtn){
-    themeToggleBtn.addEventListener('click', function(){
+    themeToggleBtn.addEventListener('click', function(e){
       var current = document.documentElement.getAttribute('data-theme');
       var next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
       themeManuallySet = true;
-      var active = document.querySelector('.tab.active');
-      if(active) moveIndicator(active);
+
+      if(document.startViewTransition && !reduceMotion){
+        var rect = themeToggleBtn.getBoundingClientRect();
+        var x = rect.left + rect.width / 2;
+        var y = rect.top + rect.height / 2;
+        var endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y)
+        );
+        document.documentElement.style.setProperty('--reveal-x', x + 'px');
+        document.documentElement.style.setProperty('--reveal-y', y + 'px');
+        document.documentElement.style.setProperty('--reveal-radius', endRadius + 'px');
+
+        var transition = document.startViewTransition(function(){ applyThemeSwap(next); });
+        transition.ready.catch(function(){});
+      } else {
+        applyThemeSwap(next);
+      }
     });
   }
   // keep following the phone's system theme live, unless the person manually toggled it
@@ -1417,8 +1497,8 @@
   var initialPanel = document.querySelector('.tier--active');
   if(initialPanel){ countUpPrices(initialPanel); }
 
-  // ---------- scroll reveal ----------
-  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box'));
+  // ---------- scroll reveal (bidirectional — animates out again on scroll-up too) ----------
+  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item'));
   revealTargets.forEach(function(el, i){
     el.classList.add('reveal');
     el.style.transitionDelay = ((i % 2) * 0.1) + 's';
@@ -1426,73 +1506,13 @@
   if(window.IntersectionObserver){
     var revealObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
-        if(entry.isIntersecting){
-          var el = entry.target;
-          el.classList.add('revealed');
-          revealObserver.unobserve(el);
-          var cleanup = function(){
-            el.classList.remove('reveal', 'revealed');
-            el.removeEventListener('transitionend', cleanup);
-          };
-          el.addEventListener('transitionend', cleanup);
-        }
+        entry.target.classList.toggle('revealed', entry.isIntersecting);
       });
     }, { threshold: .15 });
     revealTargets.forEach(function(el){ revealObserver.observe(el); });
   } else {
     revealTargets.forEach(function(el){ el.classList.remove('reveal'); });
   }
-
-  // ---------- countdown timer (تا پایان ۱۳ شهریور ۱۴۰۵ / Sep 4, 2026 end of day) ----------
-  var faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-  function toFa(n){
-    return String(n).split('').map(function(ch){
-      return /[0-9]/.test(ch) ? faDigits[+ch] : ch;
-    }).join('');
-  }
-  function pad2(n){ return toFa(n < 10 ? '0' + n : '' + n); }
-
-  var countdownTarget = new Date('2026-09-05T00:00:00');
-  var elDays = document.getElementById('tDays');
-  var elHours = document.getElementById('tHours');
-  var elMinutes = document.getElementById('tMinutes');
-  var elSeconds = document.getElementById('tSeconds');
-  var promoBanner = document.querySelector('.promo-banner');
-  var promoTextEl = document.querySelector('.promo-text');
-
-  function updateCountdown(){
-    var diff = countdownTarget.getTime() - Date.now();
-    if(diff <= 0){
-      if(elDays) elDays.textContent = '۰۰';
-      if(elHours) elHours.textContent = '۰۰';
-      if(elMinutes) elMinutes.textContent = '۰۰';
-      if(elSeconds) elSeconds.textContent = '۰۰';
-      if(promoTextEl) promoTextEl.textContent = 'مهلت تخفیف ۲۰٪ به پایان رسید';
-      clearInterval(countdownInterval);
-      return;
-    }
-    var totalSeconds = Math.floor(diff / 1000);
-    var days = Math.floor(totalSeconds / 86400);
-    var hours = Math.floor((totalSeconds % 86400) / 3600);
-    var minutes = Math.floor((totalSeconds % 3600) / 60);
-    var seconds = totalSeconds % 60;
-    if(elDays) elDays.textContent = pad2(days);
-    if(elHours) elHours.textContent = pad2(hours);
-    if(elMinutes) elMinutes.textContent = pad2(minutes);
-    if(elSeconds){
-      elSeconds.textContent = pad2(seconds);
-      elSeconds.classList.remove('tick');
-      void elSeconds.offsetWidth;
-      elSeconds.classList.add('tick');
-    }
-    if(seconds === 59 && elMinutes){
-      elMinutes.classList.remove('tick');
-      void elMinutes.offsetWidth;
-      elMinutes.classList.add('tick');
-    }
-  }
-  updateCountdown();
-  var countdownInterval = setInterval(updateCountdown, 1000);
 
   // ---------- confetti burst on page load ----------
   function launchConfetti(){
@@ -1546,7 +1566,6 @@
   var selectableRows = document.querySelectorAll('.plan-row, .unlimited-row');
   var selectedRow = null;
   var pendingRow = null;
-  var pendingMessage = null;
 
   var confirmOverlay = document.getElementById('confirmOverlay');
   var confirmYesBtn = document.getElementById('confirmYesBtn');
@@ -1568,20 +1587,12 @@
 
   function openConfirm(row){
     pendingRow = row;
-    pendingMessage = null;
     if(confirmTitleEl) confirmTitleEl.innerHTML = 'سرویس <strong id="confirmPlanName">' + getPlanLabel(row) + '</strong> رو می‌خوای؟';
-    if(confirmOverlay) confirmOverlay.classList.add('open');
-  }
-  function openFreeTestConfirm(){
-    pendingRow = null;
-    pendingMessage = 'سلام، می‌خوام یه تست رایگان بگیرم';
-    if(confirmTitleEl) confirmTitleEl.innerHTML = 'می‌خوای همین الان یه <strong>تست رایگان</strong> بگیری؟';
     if(confirmOverlay) confirmOverlay.classList.add('open');
   }
   function closeConfirm(){
     if(confirmOverlay) confirmOverlay.classList.remove('open');
     pendingRow = null;
-    pendingMessage = null;
   }
 
   selectableRows.forEach(function(row){
@@ -1598,17 +1609,13 @@
     });
   });
 
-  var freeTestBtn = document.getElementById('freeTestBtn');
-  if(freeTestBtn){
-    freeTestBtn.addEventListener('click', openFreeTestConfirm);
-  }
-
   if(confirmYesBtn){
     confirmYesBtn.addEventListener('click', function(){
-      var message = pendingMessage || (pendingRow ? ('سلام، من سرویس ' + getPlanLabel(pendingRow) + ' رو می‌خوام') : null);
-      if(!message) return;
+      if(!pendingRow) return;
+      var message = 'سلام، من سرویس ' + getPlanLabel(pendingRow) + ' رو می‌خوام';
       var url = 'https://t.me/WaliAdmin?text=' + encodeURIComponent(message);
       window.open(url, '_blank', 'noopener');
+      if(selectedRow){ selectedRow.classList.remove('selected'); selectedRow = null; }
       closeConfirm();
     });
   }
@@ -1627,11 +1634,47 @@
     });
   }
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && confirmOverlay && confirmOverlay.classList.contains('open')){
-      if(selectedRow){ selectedRow.classList.remove('selected'); selectedRow = null; }
-      closeConfirm();
+    if(e.key === 'Escape'){
+      if(confirmOverlay && confirmOverlay.classList.contains('open')){
+        if(selectedRow){ selectedRow.classList.remove('selected'); selectedRow = null; }
+        closeConfirm();
+      }
+      if(freetestOverlay && freetestOverlay.classList.contains('open')){
+        closeFreetest();
+      }
     }
   });
+
+  // ---------- free test: ask which service type first ----------
+  var freetestOverlay = document.getElementById('freetestOverlay');
+  var freeTestBtn = document.getElementById('freeTestBtn');
+  var freetestUnlimitedBtn = document.getElementById('freetestUnlimited');
+  var freetestVolumeBtn = document.getElementById('freetestVolume');
+  var freetestCancelBtn = document.getElementById('freetestCancelBtn');
+
+  function openFreetest(){
+    if(freetestOverlay) freetestOverlay.classList.add('open');
+  }
+  function closeFreetest(){
+    if(freetestOverlay) freetestOverlay.classList.remove('open');
+  }
+  function sendFreetestMessage(kind){
+    var label = kind === 'unlimited' ? 'نامحدود' : 'حجمی';
+    var message = 'سلام، می‌خوام یه تست رایگان از سرویس ' + label + ' بگیرم';
+    var url = 'https://t.me/WaliAdmin?text=' + encodeURIComponent(message);
+    window.open(url, '_blank', 'noopener');
+    closeFreetest();
+  }
+
+  if(freeTestBtn){ freeTestBtn.addEventListener('click', openFreetest); }
+  if(freetestUnlimitedBtn){ freetestUnlimitedBtn.addEventListener('click', function(){ sendFreetestMessage('unlimited'); }); }
+  if(freetestVolumeBtn){ freetestVolumeBtn.addEventListener('click', function(){ sendFreetestMessage('volume'); }); }
+  if(freetestCancelBtn){ freetestCancelBtn.addEventListener('click', closeFreetest); }
+  if(freetestOverlay){
+    freetestOverlay.addEventListener('click', function(e){
+      if(e.target === freetestOverlay) closeFreetest();
+    });
+  }
 
   // ---------- FAQ accordion ----------
   var faqItems = document.querySelectorAll('.faq-item');
