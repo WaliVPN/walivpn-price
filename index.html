@@ -74,7 +74,7 @@
     animation: theme-reveal .65s cubic-bezier(.65,0,.35,1);
   }
 
-  *{ box-sizing: border-box; margin:0; padding:0; }
+  *{ box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
   html{ scroll-behavior: smooth; }
 
   body{
@@ -439,17 +439,21 @@
   .renewal-toggle{
     display:flex; align-items:center; justify-content:center; gap:10px;
     margin: 0 auto 28px;
-    cursor:pointer;
     user-select:none;
   }
   .renewal-toggle-text{ font-size: 13px; font-weight: 600; color: var(--text-dim); }
-  .switch{ position:relative; display:inline-block; width:42px; height:24px; flex-shrink:0; }
-  .switch input{ position:absolute; opacity:0; width:0; height:0; }
+  .switch{
+    position:relative; display:inline-block; width:42px; height:24px; flex-shrink:0; cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .switch input{ position:absolute; opacity:0; width:0; height:0; outline: none; }
+  .switch input:focus-visible ~ .switch-track{ box-shadow: 0 0 0 3px var(--blue-soft); }
   .switch-track{
     position:absolute; inset:0;
     background: var(--line);
     border-radius: 999px;
     transition: background-color .25s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .switch-thumb{
     position:absolute; top:3px; right:3px;
@@ -800,11 +804,35 @@
   .cta-btn svg{ width:18px; height:18px; }
   .cta-btn span{ color: var(--blue); }
 
-  .foot-meta{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    text-align:center; margin-top: 28px; color: var(--text-faint); font-size: 12.5px;
+  .site-footer{
+    max-width: 640px;
+    margin: 34px auto 0;
+    text-align: center;
+    display:flex; flex-direction:column; align-items:center; gap:12px;
   }
-  .foot-meta img{ width:16px; height:16px; opacity:.6; }
+  .site-footer-brand{ display:flex; align-items:center; gap:8px; }
+  .site-footer-logo{ width:20px; height:20px; color: var(--blue); display:flex; align-items:center; justify-content:center; }
+  .site-footer-logo svg{ width:100%; height:100%; display:block; }
+  .site-footer-name{ font-size:15px; font-weight:800; color: var(--text); direction:ltr; }
+  .site-footer-name span{ color: var(--blue); }
+  .site-footer-tagline{ font-size: 12.5px; color: var(--text-dim); }
+
+  .site-footer-links{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .site-footer-links a{
+    font-size: 12.5px; font-weight:600; color: var(--text-dim);
+    text-decoration:none;
+    transition: color .15s ease;
+  }
+  .site-footer-links a:hover{ color: var(--blue); }
+  .site-footer-dot{ color: var(--text-faint); font-size: 10px; }
+
+  .site-footer-bottom{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+    width:100%;
+    color: var(--text-faint); font-size: 12px;
+  }
 
   /* ---------- Responsive ---------- */
   @media (max-width: 880px){
@@ -983,13 +1011,13 @@
       </div>
     </div>
 
-    <label class="renewal-toggle">
+    <div class="renewal-toggle">
       <span class="renewal-toggle-text">تمدید می‌کنم؟ (۳۰,۰۰۰ تومان ارزون‌تر)</span>
-      <span class="switch">
+      <label class="switch">
         <input type="checkbox" id="renewalCheckbox">
         <span class="switch-track"><span class="switch-thumb"></span></span>
-      </span>
-    </label>
+      </label>
+    </div>
 
     <div class="plans-panel">
 
@@ -1183,7 +1211,7 @@
       </div>
     </div>
 
-    <div class="faq-section">
+    <div class="faq-section" id="faqSection">
       <h2 class="section-title">سوالات متداول</h2>
       <div class="faq-list">
 
@@ -1256,9 +1284,28 @@
         <span style="font-weight:800;">@WaliAdmin</span>
       </a>
     </div>
-    <div class="foot-meta">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity:.55;"><path d="M3 4h4l3 12 2.5-9h2l2.5 9L20 4h1l-4.2 16h-2.3l-2.5-9-2.5 9H7L3 4Z"/></svg>
-      WaliVPN — قیمت‌ها ممکن است به‌روزرسانی شوند
+
+    <div class="site-footer">
+      <div class="site-footer-brand">
+        <span class="site-footer-logo">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h4l3 12 2.5-9h2l2.5 9L20 4h1l-4.2 16h-2.3l-2.5-9-2.5 9H7L3 4Z"/></svg>
+        </span>
+        <span class="site-footer-name">Wali<span>VPN</span></span>
+      </div>
+      <p class="site-footer-tagline">سرویس VPN سریع و پایدار، برای همه‌ی دستگاه‌ها</p>
+
+      <nav class="site-footer-links">
+        <a href="https://t.me/WaliVPNShop" target="_blank" rel="noopener">کانال تلگرام</a>
+        <span class="site-footer-dot">•</span>
+        <a href="https://t.me/WaliAdmin" target="_blank" rel="noopener">پشتیبانی</a>
+        <span class="site-footer-dot">•</span>
+        <a href="#faqSection">سوالات متداول</a>
+      </nav>
+
+      <div class="site-footer-bottom">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity:.55;"><path d="M3 4h4l3 12 2.5-9h2l2.5 9L20 4h1l-4.2 16h-2.3l-2.5-9-2.5 9H7L3 4Z"/></svg>
+        WaliVPN © ۱۴۰۵
+      </div>
     </div>
   </footer>
 
