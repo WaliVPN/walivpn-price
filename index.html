@@ -391,40 +391,82 @@
 
   /* ---------- How it works ---------- */
   .how-it-works{
+    position:relative;
+    overflow:hidden;
     max-width: 640px;
     margin: 0 auto 30px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 22px 20px;
+    border-radius: 22px;
+    padding: 26px 22px 22px;
+  }
+  .how-it-works::before{
+    content:"";
+    position:absolute; top:0; right:0; left:0; height:3px;
+    background: linear-gradient(90deg, var(--blue), var(--green), var(--orange), var(--purple));
   }
   .how-title{
     text-align:center;
-    font-size: 14.5px; font-weight: 800; color: var(--text);
-    margin-bottom: 18px;
+    font-size: 15px; font-weight: 800; color: var(--text);
+    margin-bottom: 22px;
   }
   .how-steps{
-    display:flex; flex-wrap:wrap; justify-content:center;
-    gap: 10px;
+    position:relative;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap: 4px;
+  }
+  .how-steps::before{
+    content:"";
+    position:absolute;
+    top: 21px;
+    right: calc(12.5% + 2px);
+    left: calc(12.5% + 2px);
+    height: 2px;
+    background: var(--line);
+    z-index: 0;
   }
   .how-step{
-    flex: 1 1 120px;
-    max-width: 150px;
+    position:relative;
+    z-index:1;
+    flex: 1;
+    min-width: 0;
     display:flex; flex-direction:column; align-items:center; text-align:center;
-    gap: 8px;
+    gap: 9px;
   }
   .how-num{
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--blue-soft); color: var(--blue);
+    position:relative;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--blue-soft);
+    color: var(--blue);
     display:flex; align-items:center; justify-content:center;
-    font-size: 13.5px; font-weight: 800; line-height:1;
     flex-shrink:0;
+    transition: transform .15s ease;
   }
-  .how-step p{ font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .how-num svg{ width:18px; height:18px; display:block; }
+  .how-num-badge{
+    position:absolute; bottom:-3px; left:-3px;
+    width:17px; height:17px; border-radius:50%;
+    background: var(--blue); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 9.5px; font-weight:800; line-height:1;
+    border: 2px solid var(--surface);
+  }
+  .how-step:nth-child(2) .how-num{ background: var(--green-soft); color: var(--green); }
+  .how-step:nth-child(2) .how-num-badge{ background: var(--green); }
+  .how-step:nth-child(3) .how-num{ background: var(--orange-soft); color: var(--orange); }
+  .how-step:nth-child(3) .how-num-badge{ background: var(--orange); }
+  .how-step:nth-child(4) .how-num{ background: var(--purple-soft); color: var(--purple); }
+  .how-step:nth-child(4) .how-num-badge{ background: var(--purple); }
+  .how-step:hover .how-num{ transform: scale(1.08); }
+  .how-step p{ font-size: 11.5px; color: var(--text-dim); line-height: 1.6; padding: 0 2px; }
 
   @media (max-width: 480px){
-    .how-steps{ gap: 14px 8px; }
-    .how-step{ flex: 1 1 40%; max-width: 46%; }
+    .how-steps::before{ right: 11%; left: 11%; }
+    .how-num{ width: 36px; height: 36px; }
+    .how-num svg{ width:15px; height:15px; }
+    .how-num-badge{ width:15px; height:15px; font-size:8.5px; }
+    .how-steps::before{ top: 18px; }
+    .how-step p{ font-size: 10.5px; }
   }
 
   /* ---------- Tier tabs (the "menu") ---------- */
@@ -981,19 +1023,31 @@
       <p class="how-title">چطور سفارش بدم؟</p>
       <div class="how-steps">
         <div class="how-step">
-          <span class="how-num">۱</span>
+          <span class="how-num">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="how-num-badge">۱</span>
+          </span>
           <p>پلن مدنظرت رو پیدا کن</p>
         </div>
         <div class="how-step">
-          <span class="how-num">۲</span>
+          <span class="how-num">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6M4 8h10l4 4-4 4H4z"/></svg>
+            <span class="how-num-badge">۲</span>
+          </span>
           <p>روی همون پلن کلیک کن</p>
         </div>
         <div class="how-step">
-          <span class="how-num">۳</span>
+          <span class="how-num">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg>
+            <span class="how-num-badge">۳</span>
+          </span>
           <p>توی پنجره «بله» رو بزن</p>
         </div>
         <div class="how-step">
-          <span class="how-num">۴</span>
+          <span class="how-num">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.4-8.5c.4-.4-.1-.6-.6-.2L6.5 13 1.6 11.5c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3Z"/></svg>
+            <span class="how-num-badge">۴</span>
+          </span>
           <p>پیام آماده رو برای ادمین بفرست</p>
         </div>
       </div>
@@ -1574,7 +1628,7 @@
   }
 
   // ---------- scroll reveal (bidirectional — animates out again on scroll-up too) ----------
-  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item'));
+  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item, .how-it-works'));
   revealTargets.forEach(function(el, i){
     el.classList.add('reveal');
     el.style.transitionDelay = ((i % 2) * 0.1) + 's';
