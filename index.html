@@ -378,6 +378,29 @@
     .feature-chip svg{ width:11px; height:11px; }
   }
 
+  /* ---------- Trust strip (live customer count) ---------- */
+  .trust-strip{
+    display:inline-flex; align-items:center; gap:8px;
+    margin-top: 14px;
+    padding: 7px 14px 7px 12px;
+    border-radius: 999px;
+    background: var(--green-soft);
+    border: 1px solid rgba(47,192,134,.3);
+    width: fit-content;
+  }
+  .trust-dot{
+    width:8px; height:8px; border-radius:50%; background: var(--green); flex-shrink:0;
+    box-shadow: 0 0 0 0 rgba(47,192,134,.6);
+    animation: trust-pulse 2s ease-out infinite;
+  }
+  @keyframes trust-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(47,192,134,.55); }
+    70%{ box-shadow: 0 0 0 8px rgba(47,192,134,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(47,192,134,0); }
+  }
+  .trust-strip-label{ font-size: 12px; font-weight: 600; color: var(--green); }
+  .trust-strip-label b{ font-weight: 800; }
+
   /* ---------- Signature W divider ---------- */
   .w-divider{ width: 100%; height: 46px; margin: 44px 0 34px; overflow: hidden; }
   .w-divider svg{ width:100%; height:100%; display:block; }
@@ -576,6 +599,7 @@
     border: 1px solid var(--line);
     border-radius: 22px;
     padding: 30px 26px 26px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 12px 32px -18px rgba(0,0,0,.12);
     opacity: 0;
     transform: translateY(10px) scale(.985);
     transition: opacity .32s cubic-bezier(.25,.1,.25,1), transform .32s cubic-bezier(.25,.1,.25,1);
@@ -595,23 +619,26 @@
   .tier-dot{ width:9px; height:9px; border-radius:50%; background: var(--tone); box-shadow: 0 0 0 4px var(--tone-soft); }
   .tier-meta{ color: var(--text-faint); font-size: 13px; margin-bottom: 22px; }
 
-  .plan-list{ list-style:none; display:flex; flex-direction:column; }
+  .plan-list{ list-style:none; display:flex; flex-direction:column; gap: 9px; }
   .plan-row{
     display:flex; align-items:center; justify-content:space-between; gap: 12px;
-    padding: 16px 6px; border-top: 1px solid var(--line-soft);
-    border-radius: 10px;
+    padding: 15px 15px; background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
     cursor: pointer;
-    transition: background .15s ease, box-shadow .25s ease;
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background-color .15s ease;
   }
-  .plan-row:first-child{ border-top:none; }
-  .plan-row:hover{ background: var(--line-soft); }
+  .plan-row:hover{
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--tone) 45%, var(--line));
+    box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--tone) 55%, transparent);
+  }
 
   .plan-row.selected{
     background: var(--tone-soft);
-    border-top-color: transparent;
+    border-color: var(--tone);
     box-shadow: 0 0 0 1px var(--tone);
   }
-  .plan-row.selected + .plan-row{ border-top-color: transparent; }
   .plan-row.selected .plan-gb,
   .plan-row.selected .price-num{ color: var(--tone); }
 
@@ -633,12 +660,17 @@
   .unlimited-list{ list-style:none; display:flex; flex-direction:column; gap: 10px; }
   .unlimited-row{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding: 16px 16px; border-radius: 14px;
+    padding: 17px 16px; border-radius: 14px;
     background: var(--purple-soft);
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: transform .15s ease, box-shadow .25s ease;
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
   }
-  .unlimited-row:hover{ transform: translateY(-1px); }
+  .unlimited-row:hover{
+    transform: translateY(-1px);
+    border-color: var(--purple);
+    box-shadow: 0 10px 22px -12px rgba(255,59,78,.35);
+  }
   .unlimited-row.selected{
     box-shadow: 0 0 0 1px var(--purple);
   }
@@ -708,6 +740,48 @@
   .note:hover{ transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
   .note[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
   .note[data-tone="green"]{ --tone: var(--green); --tone-soft: var(--green-soft); }
+  .note[data-tone="orange"]{ --tone: var(--orange); --tone-soft: var(--orange-soft); }
+  .note-list{ list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:6px; }
+  .note-list li{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color: var(--text-dim); line-height:1.8; }
+  .note-list li::before{ content:"—"; color: var(--tone); flex-shrink:0; font-weight:800; }
+
+  /* ---------- Inline warning box under the unlimited tab panel ---------- */
+  .tier-warning{
+    position:relative;
+    overflow:hidden;
+    margin-top: 18px;
+    padding: 18px 18px 16px;
+    border-radius: 16px;
+    background: var(--orange-soft);
+    border: 1px solid rgba(255,154,68,.35);
+  }
+  .tier-warning-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .tier-warning-icon{
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    width:32px; height:32px; border-radius:10px;
+    background: linear-gradient(155deg, var(--orange) 0%, color-mix(in srgb, var(--orange) 65%, var(--surface)) 100%);
+    box-shadow: 0 6px 14px -5px rgba(255,154,68,.5);
+  }
+  .tier-warning-icon svg{ width:16px; height:16px; color:#fff; }
+  .tier-warning-title{ font-size: 13.5px; font-weight: 800; color: var(--orange); }
+  .tier-warning ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:7px; }
+  .tier-warning li{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color: var(--text-dim); line-height:1.8; }
+  .tier-warning li::before{ content:"—"; color: var(--orange); flex-shrink:0; font-weight:800; }
+
+  /* ---------- Quality-score chip (under tier-meta) ---------- */
+  .quality-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    margin: 2px 0 18px;
+    padding: 6px 12px 6px 10px;
+    border-radius: 999px;
+    background: var(--tone-soft);
+    border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
+    box-shadow: 0 4px 10px -6px color-mix(in srgb, var(--tone) 60%, transparent);
+    font-size: 12.5px; font-weight: 700; color: var(--tone);
+    width: fit-content;
+  }
+  .quality-badge svg{ width:14px; height:14px; flex-shrink:0; }
+  .quality-badge b{ font-weight: 800; }
 
   .note-head{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
   .note-icon{
@@ -733,6 +807,90 @@
   .note-cta svg{ width:13px; height:13px; display:block; }
   .note-cta:hover{ transform: translateY(-1px); }
   .note-cta:active{ transform: scale(.97); }
+
+  /* ---------- Per-tab free-test button ---------- */
+  .tier-test-cta{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    width:100%;
+    margin-top: 18px;
+    background: var(--tone-soft); color: var(--tone);
+    border: 1px dashed color-mix(in srgb, var(--tone) 45%, transparent);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: inherit; font-size: 13px; font-weight: 700; line-height:1;
+    cursor:pointer;
+    transition: background-color .15s ease, transform .15s ease;
+  }
+  .tier-test-cta svg{ width:14px; height:14px; display:block; }
+  .tier-test-cta:hover{ transform: translateY(-1px); }
+  .tier-test-cta:active{ transform: scale(.97); }
+
+  /* ---------- Why us ---------- */
+  .why-us{
+    max-width: 960px;
+    margin: 48px auto 0;
+    text-align: center;
+  }
+  .why-us-title{
+    font-size: clamp(20px, 3.8vw, 27px);
+    font-weight: 800; line-height: 1.65; color: var(--text);
+  }
+  .why-us-title span{
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .why-us-sub{ margin-top: 9px; font-size: 13.5px; color: var(--text-dim); }
+  .why-grid{
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    text-align: right;
+  }
+  @media (max-width: 720px){
+    .why-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px){
+    .why-grid{ grid-template-columns: 1fr; }
+  }
+  .why-card{
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 20px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    transition: transform .2s cubic-bezier(.25,.1,.25,1), box-shadow .2s ease, border-color .2s ease;
+  }
+  .why-card:hover{
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--tone) 40%, var(--line));
+    box-shadow: 0 14px 32px -12px color-mix(in srgb, var(--tone) 45%, transparent);
+  }
+  .why-card::before{
+    content:"";
+    position:absolute; top:-38px; left:-38px;
+    width:100px; height:100px; border-radius:50%;
+    background: radial-gradient(circle, var(--tone-soft) 0%, transparent 72%);
+    pointer-events:none;
+  }
+  .why-card[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
+  .why-card[data-tone="green"]{ --tone: var(--green); --tone-soft: var(--green-soft); }
+  .why-card[data-tone="orange"]{ --tone: var(--orange); --tone-soft: var(--orange-soft); }
+  .why-card[data-tone="purple"]{ --tone: var(--purple); --tone-soft: var(--purple-soft); }
+  .why-card-row{ position:relative; display:flex; align-items:center; gap:12px; }
+  .why-card-icon{
+    display:flex; align-items:center; justify-content:center;
+    width: 46px; height: 46px; flex-shrink:0;
+    border-radius: 14px;
+    background: linear-gradient(155deg, var(--tone) 0%, color-mix(in srgb, var(--tone) 65%, var(--surface)) 100%);
+    color: #fff;
+    box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--tone) 60%, transparent);
+  }
+  .why-card-icon svg{ width:21px; height:21px; }
+  .why-card-title{ font-size: 15px; font-weight: 800; color: var(--text); }
+  .why-card-desc{ position:relative; margin-top: 13px; font-size: 12.5px; color: var(--text-dim); line-height: 1.9; }
 
   /* ---------- FAQ ---------- */
   .faq-section{
@@ -1000,6 +1158,11 @@
         <span class="feature-chip-label">کانفیگ اختصاصی برای هر کاربر</span>
       </div>
     </div>
+
+    <div class="trust-strip">
+      <span class="trust-dot"></span>
+      <span class="trust-strip-label">بیش از <b>۳۰۰ مشتری</b> هم‌زمان آنلاین روی سرویس‌های ما</span>
+    </div>
   </header>
 
   <div class="w-divider" aria-hidden="true">
@@ -1082,6 +1245,10 @@
           <span class="tier-dot"></span>
         </div>
         <div class="tier-meta">۶ گزینه حجمی · اعتبار ۳۰ روز</div>
+        <div class="quality-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 15 9l7 1-5.2 5 1.3 7L12 18.8 5.9 22l1.3-7L2 10l7-1 3-7Z"/></svg>
+          کیفیت: <b>۱۰ از ۱۰</b>
+        </div>
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۵۰ گیگ</span><span class="badge">محبوب</span></span>
@@ -1104,10 +1271,14 @@
             <span class="plan-price"><span class="price-num" data-value="1300000">۱,۳۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
-            <span class="plan-left"><span class="plan-gb">۳۰۰ گیگ</span></span>
+            <span class="plan-left"><span class="plan-gb">۳۰۰ گیگ</span><span class="badge">صرفه‌جوترین</span></span>
             <span class="plan-price"><span class="price-num" data-value="1550000">۱,۵۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
+        <button class="tier-test-cta" id="testBtnBlue" type="button">
+          دریافت تست رایگان همین پلن
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </section>
 
       <!-- 2 months -->
@@ -1117,6 +1288,10 @@
           <span class="tier-dot"></span>
         </div>
         <div class="tier-meta">۸ گزینه حجمی · اعتبار ۶۰ روز</div>
+        <div class="quality-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 15 9l7 1-5.2 5 1.3 7L12 18.8 5.9 22l1.3-7L2 10l7-1 3-7Z"/></svg>
+          کیفیت: <b>۱۰ از ۱۰</b>
+        </div>
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۵۰ گیگ</span><span class="badge">جدید</span></span>
@@ -1147,10 +1322,14 @@
             <span class="plan-price"><span class="price-num" data-value="1850000">۱,۸۵۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
-            <span class="plan-left"><span class="plan-gb">۴۰۰ گیگ</span></span>
+            <span class="plan-left"><span class="plan-gb">۴۰۰ گیگ</span><span class="badge">صرفه‌جوترین</span></span>
             <span class="plan-price"><span class="price-num" data-value="2090000">۲,۰۹۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
+        <button class="tier-test-cta" id="testBtnGreen" type="button">
+          دریافت تست رایگان همین پلن
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </section>
 
       <!-- 3 months -->
@@ -1160,6 +1339,10 @@
           <span class="tier-dot"></span>
         </div>
         <div class="tier-meta">۹ گزینه حجمی · اعتبار ۹۰ روز</div>
+        <div class="quality-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 15 9l7 1-5.2 5 1.3 7L12 18.8 5.9 22l1.3-7L2 10l7-1 3-7Z"/></svg>
+          کیفیت: <b>۱۰ از ۱۰</b>
+        </div>
         <ul class="plan-list">
           <li class="plan-row">
             <span class="plan-left"><span class="plan-gb">۱۰۰ گیگ</span><span class="badge">جدید</span></span>
@@ -1194,10 +1377,14 @@
             <span class="plan-price"><span class="price-num" data-value="2400000">۲,۴۰۰,۰۰۰</span><small>تومان</small></span>
           </li>
           <li class="plan-row">
-            <span class="plan-left"><span class="plan-gb">۵۰۰ گیگ</span></span>
+            <span class="plan-left"><span class="plan-gb">۵۰۰ گیگ</span><span class="badge">صرفه‌جوترین</span></span>
             <span class="plan-price"><span class="price-num" data-value="2640000">۲,۶۴۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
+        <button class="tier-test-cta" id="testBtnOrange" type="button">
+          دریافت تست رایگان همین پلن
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </section>
 
       <!-- Unlimited -->
@@ -1207,6 +1394,10 @@
           <span class="tier-dot"></span>
         </div>
         <div class="tier-meta">۲ گزینه · بدون محدودیت حجم · اعتبار ۳۰ روز</div>
+        <div class="quality-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 15 9l7 1-5.2 5 1.3 7L12 18.8 5.9 22l1.3-7L2 10l7-1 3-7Z"/></svg>
+          کیفیت: <b>۹ از ۱۰</b>
+        </div>
         <ul class="unlimited-list">
           <li class="unlimited-row">
             <span class="unlimited-left">
@@ -1222,6 +1413,23 @@
             <span class="plan-price"><span class="price-num" data-value="430000">۴۳۰,۰۰۰</span><small>تومان</small></span>
           </li>
         </ul>
+
+        <div class="tier-warning">
+          <div class="tier-warning-head">
+            <span class="tier-warning-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg></span>
+            <span class="tier-warning-title">سرویس نامحدود مناسب چه کسانیه؟</span>
+          </div>
+          <ul>
+            <li>اگر مصرف ماهانه‌تون زیر ۵۰ گیگ هست، اصلاً توصیه نمی‌شه.</li>
+            <li>اگر پیج اینستاگرام کاری دارین، توصیه نمی‌شه؛ چون آی‌پی‌ش متغیره.</li>
+            <li>اگر می‌خواین بازی آنلاین انجام بدین، اصلاً توصیه نمی‌شه.</li>
+            <li>فقط به‌درد مصارف خانگی و روزمره و عادی می‌خوره.</li>
+          </ul>
+        </div>
+        <button class="tier-test-cta" id="testBtnPurple" type="button">
+          دریافت تست رایگان همین پلن
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </section>
 
     </div>
@@ -1245,23 +1453,63 @@
     </div>
 
     <div class="notes">
-      <div class="note" data-tone="blue">
-        <div class="note-head">
-          <span class="note-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <h3 class="note-title">تست رایگان</h3>
-        </div>
-        <p class="note-desc">قبل از خرید فعال است — قبل از پرداخت، سرویس رو امتحان کن.</p>
-        <button class="note-cta" id="freeTestBtn" type="button">
-          دریافت تست رایگان
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </div>
       <div class="note" data-tone="green">
         <div class="note-head">
           <span class="note-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/><path d="M12 8v4l3 2"/></svg></span>
           <h3 class="note-title">تمدید سرویس‌های حجمی</h3>
         </div>
         <p class="note-desc">با ۳۰,۰۰۰ تومان تخفیف نسبت به قیمت خرید انجام می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="why-us">
+      <div class="why-us-head">
+        <h2 class="why-us-title">ما فقط به شما وی‌پی‌ان نمی‌فروشیم؛<br>ما به شما <span>آرامش</span> می‌فروشیم.</h2>
+        <p class="why-us-sub">یه وی‌پی‌ان بی‌دردسر — بدون نگرانی، بدون پیچیدگی.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card" data-tone="blue">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 11-14h-7l0-6Z"/></svg></span>
+            <h3 class="why-card-title">سرعت عالی</h3>
+          </div>
+          <p class="why-card-desc">بدون افت و قطعی، حتی توی ساعت شلوغی.</p>
+        </div>
+        <div class="why-card" data-tone="green">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></span>
+            <h3 class="why-card-title">پشتیبانی در لحظه</h3>
+          </div>
+          <p class="why-card-desc">جوابتون رو سریع می‌دیم، نه فردا نه پس‌فردا.</p>
+        </div>
+        <div class="why-card" data-tone="orange">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h3 class="why-card-title">تضمین داریم</h3>
+          </div>
+          <p class="why-card-desc">راضی نبودی؟ تا یک هفته وجهت رو برمی‌گردونیم.</p>
+        </div>
+        <div class="why-card" data-tone="purple">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+            <h3 class="why-card-title">حریم خصوصی</h3>
+          </div>
+          <p class="why-card-desc">کانفیگ اختصاصی برای هر کاربر، بدون اشتراک‌گذاری.</p>
+        </div>
+        <div class="why-card" data-tone="blue">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 4 6 4 9s-1.5 6.3-4 9c-2.5-2.7-4-6-4-9s1.5-6.3 4-9Z"/></svg></span>
+            <h3 class="why-card-title">پایداری بالا</h3>
+          </div>
+          <p class="why-card-desc">با تعویض لوکیشن یا کانفیگ همیشه یه راه‌حل داریم.</p>
+        </div>
+        <div class="why-card" data-tone="green">
+          <div class="why-card-row">
+            <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg></span>
+            <h3 class="why-card-title">راهنمایی صادقانه</h3>
+          </div>
+          <p class="why-card-desc">اگه پلنی به دردت نخوره، رک بهت می‌گیم.</p>
+        </div>
       </div>
     </div>
 
@@ -1628,7 +1876,7 @@
   }
 
   // ---------- scroll reveal (bidirectional — animates out again on scroll-up too) ----------
-  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item, .how-it-works'));
+  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item, .how-it-works, .why-card'));
   revealTargets.forEach(function(el, i){
     el.classList.add('reveal');
     el.style.transitionDelay = ((i % 2) * 0.1) + 's';
@@ -1755,6 +2003,16 @@
   if(freetestUnlimitedBtn){ freetestUnlimitedBtn.addEventListener('click', function(){ sendFreetestMessage('unlimited'); }); }
   if(freetestVolumeBtn){ freetestVolumeBtn.addEventListener('click', function(){ sendFreetestMessage('volume'); }); }
   if(freetestCancelBtn){ freetestCancelBtn.addEventListener('click', closeFreetest); }
+
+  // ---------- per-tab test buttons: send directly, no type-picker needed ----------
+  var testBtnBlue = document.getElementById('testBtnBlue');
+  var testBtnGreen = document.getElementById('testBtnGreen');
+  var testBtnOrange = document.getElementById('testBtnOrange');
+  var testBtnPurple = document.getElementById('testBtnPurple');
+  if(testBtnBlue){ testBtnBlue.addEventListener('click', function(){ sendFreetestMessage('volume'); }); }
+  if(testBtnGreen){ testBtnGreen.addEventListener('click', function(){ sendFreetestMessage('volume'); }); }
+  if(testBtnOrange){ testBtnOrange.addEventListener('click', function(){ sendFreetestMessage('volume'); }); }
+  if(testBtnPurple){ testBtnPurple.addEventListener('click', function(){ sendFreetestMessage('unlimited'); }); }
   if(freetestOverlay){
     freetestOverlay.addEventListener('click', function(e){
       if(e.target === freetestOverlay) closeFreetest();
