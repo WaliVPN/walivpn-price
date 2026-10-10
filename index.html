@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root,
   :root[data-theme="dark"]{
@@ -70,7 +71,8 @@
     from{ clip-path: circle(0px at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
     to{ clip-path: circle(var(--reveal-radius, 150%) at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
   }
-  ::view-transition-new(root){
+  /* scoped: only the theme-toggle click adds this class, so it never fires during a tab switch */
+  :root.theme-transition::view-transition-new(root){
     animation: theme-reveal .65s cubic-bezier(.65,0,.35,1);
   }
 
@@ -596,9 +598,34 @@
     opacity: 0;
     transform: translateY(10px) scale(.985);
     transition: opacity .32s cubic-bezier(.25,.1,.25,1), transform .32s cubic-bezier(.25,.1,.25,1);
+    view-transition-name: tier-panel;
   }
   .tier.tier--active{ display:block; }
   .tier.tier--visible{ opacity:1; transform: translateY(0) scale(1); }
+
+  /* ---------- Match-cut transition between tabs (View Transitions API) ---------- */
+  @supports (view-transition-name: none){
+    ::view-transition-group(tier-panel){
+      animation-duration: .4s;
+      animation-timing-function: cubic-bezier(.22,1,.36,1);
+    }
+    ::view-transition-image-pair(tier-panel){ isolation: isolate; }
+    ::view-transition-old(tier-panel){
+      animation: mc-cut-out .2s cubic-bezier(.4,0,1,1) both;
+      mix-blend-mode: normal;
+    }
+    ::view-transition-new(tier-panel){
+      animation: mc-cut-in .4s cubic-bezier(.22,1,.36,1) both;
+      mix-blend-mode: normal;
+    }
+  }
+  @keyframes mc-cut-out{
+    to{ opacity: 0; transform: scale(.97) translateX(calc(var(--tier-dir, 1) * -14px)); }
+  }
+  @keyframes mc-cut-in{
+    from{ opacity: 0; transform: scale(1.03) translateX(calc(var(--tier-dir, 1) * 14px)); }
+    to{ opacity: 1; transform: scale(1) translateX(0); }
+  }
 
   .tier[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
   .tier[data-tone="green"]{ --tone: var(--green); --tone-soft: var(--green-soft); }
@@ -845,6 +872,165 @@
   .tier-test-cta svg{ width:14px; height:14px; display:block; }
   .tier-test-cta:hover{ transform: translateY(-1px); }
   .tier-test-cta:active{ transform: scale(.97); }
+
+  /* ---------- Limited-time promo: struck-through prices ---------- */
+  .plan-price.has-promo{ flex-wrap: wrap; justify-content: flex-end; row-gap: 3px; }
+  .old-price{
+    flex: 0 0 100%;
+    display:flex; align-items:center; justify-content:flex-end; gap:7px;
+    font-size: 12.5px; font-weight: 500; color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  /* diagonal strike instead of a straight line-through: the Persian zero is just a dot that sits
+     exactly on the line-through height, which made "۲۷۰,۰۰۰" unreadable */
+  .old-price s{
+    --strike: color-mix(in srgb, var(--tone, var(--purple)) 85%, transparent);
+    position: relative; display: inline-block; text-decoration: none; line-height: 1.5;
+  }
+  .old-price s::after{
+    content:""; position:absolute; left:-3px; right:-3px; top:0; bottom:0; pointer-events:none;
+    background: linear-gradient(to top right, transparent calc(50% - .75px), var(--strike) calc(50% - .75px), var(--strike) calc(50% + .75px), transparent calc(50% + .75px));
+  }
+  .off-pill{
+    font-style: normal; font-size: 10.5px; font-weight: 800; line-height: 1.5;
+    padding: 1px 7px; border-radius: 999px;
+    background: var(--tone-soft, var(--purple-soft)); color: var(--tone, var(--purple));
+    direction: ltr; unicode-bidi: isolate;
+  }
+
+  /* ---------- Limited-time promo: banner + countdown ---------- */
+  .promo[hidden]{ display:none; }
+  .promo{
+    --promo-a: #3b47d6; --promo-b: #6a3cd8; --promo-c: #cf3a73;
+    /* ONE place to change the banner fonts (each stack falls back to the site font) */
+    --promo-text: 'Noto Kufi Arabic', 'Vazirmatn', sans-serif;
+    --promo-display: 'Lalezar', 'Noto Kufi Arabic', 'Vazirmatn', sans-serif;
+    position: relative; overflow: hidden;
+    max-width: 640px; margin: 0 auto 28px;
+    padding: 20px 22px 18px;
+    border-radius: 24px;
+    color: #fff;
+    font-family: var(--promo-text);
+    background: linear-gradient(135deg, var(--promo-a) 0%, var(--promo-b) 52%, var(--promo-c) 100%);
+    box-shadow: 0 24px 48px -26px rgba(106,60,216,.8), inset 0 0 0 1px rgba(255,255,255,.14);
+    isolation: isolate;
+  }
+  .promo.is-urgent{ --promo-a: #e8590c; --promo-b: #d9356b; --promo-c: #7b2fd0; box-shadow: 0 24px 48px -26px rgba(217,53,107,.85), inset 0 0 0 1px rgba(255,255,255,.16); }
+  .promo::before{
+    content:""; position:absolute; inset:0; z-index:-1;
+    background:
+      radial-gradient(280px 170px at 100% 0%, rgba(255,255,255,.24), transparent 70%),
+      radial-gradient(220px 140px at 0% 100%, rgba(0,0,0,.18), transparent 70%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 1px, transparent 1px 14px);
+  }
+  .promo::after{
+    content:""; position:absolute; top:0; bottom:0; width: 38%; z-index:-1;
+    right: -45%;
+    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.16) 50%, transparent 100%);
+    transform: skewX(-18deg);
+    animation: promo-sheen 5.5s ease-in-out infinite;
+  }
+  @keyframes promo-sheen{
+    0%, 55%{ right: -45%; }
+    100%{ right: 130%; }
+  }
+
+  .promo-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 5px 13px 5px 11px; border-radius: 999px;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.2);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    font-size: 11.5px; font-weight: 600; line-height: 1.6;
+  }
+  .promo-pulse{
+    width:7px; height:7px; border-radius:50%; background:#fff; flex-shrink:0;
+    animation: promo-pulse 1.8s ease-out infinite;
+  }
+  @keyframes promo-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(255,255,255,.7); }
+    70%{ box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  }
+
+  .promo-main{
+    margin-top: 16px;
+    display:flex; align-items:center; justify-content:space-between; gap: 22px; flex-wrap: wrap;
+  }
+  .promo-copy{ flex: 1 1 230px; min-width: 0; }
+  .promo-title{ display:flex; align-items:center; gap: 12px; }
+  .promo-pct{
+    font-family: var(--promo-display); font-weight: 400;
+    font-size: clamp(50px, 12vw, 64px); line-height: .95;
+    color: #ffd36e; text-shadow: 0 6px 26px rgba(255,190,70,.5);
+    flex-shrink: 0;
+  }
+  .promo-title-text{ display:flex; flex-direction:column; gap: 3px; line-height: 1.3; }
+  .promo-title-text b{ font-family: var(--promo-display); font-weight: 400; font-size: clamp(22px, 5.4vw, 28px); }
+  .promo-title-text i{ font-style: normal; font-size: 13px; font-weight: 500; opacity: .88; }
+  .promo-sub{ margin-top: 12px; font-size: 12px; font-weight: 400; color: rgba(255,255,255,.8); line-height: 1.9; }
+
+  /* clock order: days on the left … seconds on the right */
+  .promo-timer{
+    --gap: 14px; --tile-h: 58px;
+    display:grid; grid-template-columns: repeat(4, 58px); gap: var(--gap);
+    flex: 0 0 auto; direction: ltr;
+  }
+  .promo-cell{ direction: rtl; position: relative; text-align: center; }
+  .promo-tile{
+    position: relative; height: var(--tile-h); overflow: hidden;
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 15px;
+    background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.09) 50%, rgba(8,10,30,.34) 50.01%, rgba(8,10,30,.46) 100%);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 12px 22px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.2);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .promo-tile::after{   /* the flip-clock hairline */
+    content:""; position:absolute; left:0; right:0; top:50%; height:1px;
+    background: rgba(0,0,0,.35); box-shadow: 0 1px 0 rgba(255,255,255,.1);
+  }
+  .promo-digit{
+    position: relative; z-index: 1; display:block;
+    font-family: var(--promo-display); font-weight: 400;
+    font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 10px rgba(0,0,0,.28);
+  }
+  .promo-digit.tick{ animation: promo-tick .34s cubic-bezier(.22,1,.36,1); }
+  @keyframes promo-tick{
+    from{ transform: translateY(-8px); opacity: .15; }
+    to{ transform: none; opacity: 1; }
+  }
+  .promo-cell > span{ display:block; margin-top: 8px; font-size: 10.5px; font-weight: 500; opacity: .8; }
+  .promo-cell:not(:first-child)::before{   /* colon between tiles */
+    content: ":";
+    position:absolute; left: calc(var(--gap) / -2); top: 0; height: var(--tile-h);
+    transform: translateX(-50%);
+    display:flex; align-items:center;
+    font-family: var(--promo-display); font-size: 26px; line-height: 1;
+    animation: promo-colon 1s ease-in-out infinite;
+  }
+  @keyframes promo-colon{ 0%, 100%{ opacity: .75; } 50%{ opacity: .2; } }
+
+  .promo-bar{ margin-top: 18px; height: 5px; border-radius: 5px; background: rgba(255,255,255,.18); overflow: hidden; }
+  .promo-bar i{
+    display:block; width:100%; height:100%; border-radius: 5px;
+    background: linear-gradient(90deg, #ffd36e, #fff);
+    box-shadow: 0 0 12px rgba(255,211,110,.6);
+    transform-origin: right center;
+    transform: scaleX(var(--left, 1));
+    transition: transform 1s linear;
+  }
+  .promo-foot{ margin-top: 9px; font-size: 11px; font-weight: 400; color: rgba(255,255,255,.8); }
+
+  @media (max-width: 480px){
+    .promo{ padding: 18px 16px 16px; border-radius: 22px; }
+    .promo-main{ flex-direction: column; align-items: stretch; gap: 16px; }
+    .promo-copy{ flex: 0 0 auto; }
+    .promo-timer{ --gap: 12px; --tile-h: 54px; grid-template-columns: repeat(4, 1fr); }
+    .promo-digit{ font-size: 30px; }
+    .old-price{ font-size: 12px; }
+  }
 
   /* ---------- Why us ---------- */
   .why-us{
@@ -1190,6 +1376,28 @@
   </div>
 
   <main class="plans-section">
+
+    <!-- limited-time promo (hidden until the script confirms it is inside the date window) -->
+    <div class="promo" id="promo" hidden role="region" aria-label="تخفیف ویژه">
+      <span class="promo-tag"><span class="promo-pulse" aria-hidden="true"></span><span id="promoTagText">پیشنهاد ویژه · زمان محدود</span></span>
+      <div class="promo-main">
+        <div class="promo-copy">
+          <div class="promo-title">
+            <span class="promo-pct" id="promoPct">۲۰٪</span>
+            <span class="promo-title-text"><b>تخفیف</b><i>روی همه پلن‌ها</i></span>
+          </div>
+          <p class="promo-sub">حجمی و نامحدود · قیمت‌های زیر با تخفیف حساب شده</p>
+        </div>
+        <div class="promo-timer" role="timer" aria-label="زمان باقی‌مانده تا پایان تخفیف">
+          <div class="promo-cell"><div class="promo-tile"><b class="promo-digit" data-unit="d">۰۰</b></div><span>روز</span></div>
+          <div class="promo-cell"><div class="promo-tile"><b class="promo-digit" data-unit="h">۰۰</b></div><span>ساعت</span></div>
+          <div class="promo-cell"><div class="promo-tile"><b class="promo-digit" data-unit="m">۰۰</b></div><span>دقیقه</span></div>
+          <div class="promo-cell"><div class="promo-tile"><b class="promo-digit" data-unit="s">۰۰</b></div><span>ثانیه</span></div>
+        </div>
+      </div>
+      <div class="promo-bar" aria-hidden="true"><i id="promoBarFill"></i></div>
+      <div class="promo-foot">تا پایان روز ۲۴ مهر · بعدش قیمت‌ها عادی می‌شه</div>
+    </div>
 
     <div class="how-it-works">
       <p class="how-title">چطور سفارش بدم؟</p>
@@ -1671,13 +1879,54 @@
     s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return s.replace(/[0-9]/g, function(d){ return faDigits[+d]; });
   }
+  // ---------- limited-time promo: ONE place to edit dates / percent ----------
+  // Times are Tehran local (UTC+03:30). Outside [start, end) the site shows normal prices
+  // and the banner disappears by itself — no manual cleanup needed.
+  var PROMO = {
+    percent: 20,
+    start: '2026-10-10T10:10:00+03:30',   // 18 مهر ۱۴۰۵ ساعت ۱۰:۱۰
+    end:   '2026-10-16T23:59:59+03:30'    // پایان روز ۲۴ مهر ۱۴۰۵
+  };
+  PROMO.startMs = Date.parse(PROMO.start);
+  PROMO.endMs = Date.parse(PROMO.end);
+  function promoActive(){
+    var n = Date.now();
+    return n >= PROMO.startMs && n < PROMO.endMs;
+  }
+  function discounted(price){
+    return Math.round(price * (100 - PROMO.percent) / 100 / 1000) * 1000;
+  }
+  function toFaDigits(str){ return String(str).replace(/[0-9]/g, function(d){ return faDigits[+d]; }); }
+  // shows the original price struck through (+ a small "-20%" pill) above the live price, or removes it
+  function setOldPrice(numEl, fullPrice){
+    var wrap = numEl.parentElement;
+    var old = wrap.querySelector('.old-price');
+    if(fullPrice === null){
+      if(old) old.remove();
+      wrap.classList.remove('has-promo');
+      return;
+    }
+    if(!old){
+      old = document.createElement('span');
+      old.className = 'old-price';
+      old.innerHTML = '<s></s><em class="off-pill"></em>';
+      wrap.insertBefore(old, numEl);
+    }
+    old.querySelector('s').textContent = formatFa(fullPrice);
+    old.querySelector('em').textContent = '-' + toFaDigits(PROMO.percent) + '٪';
+    wrap.classList.add('has-promo');
+  }
+
   function countUpPrices(panel){
     var nums = panel.querySelectorAll('.price-num');
+    var onSale = promoActive();
     nums.forEach(function(el, i){
       var base = parseInt(el.dataset.value, 10);
       if(!base && base !== 0) return;
       var isUnlimited = !!el.closest('.unlimited-row');
-      var target = (renewalMode && !isUnlimited) ? Math.max(0, base - 30000) : base;
+      var full = (renewalMode && !isUnlimited) ? Math.max(0, base - 30000) : base;
+      var target = onSale ? discounted(full) : full;
+      setOldPrice(el, onSale ? full : null);
       var duration = 650;
       var delay = Math.min(i * 35, 300);
       setTimeout(function(){
@@ -1716,22 +1965,43 @@
     if(!next || next === current || switching) return;
     switching = true;
 
-    if(current){ current.classList.remove('tier--visible'); }
+    // direction-aware slide: which way the tab bar moved decides which way the panel slides
+    var curIdx = current ? tabs.findIndex(function(t){ return t.dataset.target === current.dataset.tone; }) : -1;
+    var nextIdx = tabs.findIndex(function(t){ return t.dataset.target === tone; });
+    var dir = (curIdx === -1 || nextIdx > curIdx) ? 1 : -1;
+    document.documentElement.style.setProperty('--tier-dir', dir);
 
     var renewalToggleEl = document.querySelector('.renewal-toggle');
-    if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    setTimeout(function(){
-      if(current){ current.classList.remove('tier--active'); }
+    function swapDom(){
+      if(current){ current.classList.remove('tier--active'); current.classList.remove('tier--visible'); }
       next.classList.add('tier--active');
-      // force a reflow so the transition triggers from the initial (hidden) state
-      void next.offsetWidth;
-      requestAnimationFrame(function(){
-        next.classList.add('tier--visible');
-      });
+      next.classList.add('tier--visible');
+      if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
       countUpPrices(next);
-      switching = false;
-    }, 260);
+    }
+
+    if(document.startViewTransition && !reduceMotion){
+      // match-cut: same view-transition-name on every .tier, so the browser
+      // morphs the outgoing panel straight into the incoming one.
+      var vt = document.startViewTransition(swapDom);
+      vt.finished.finally(function(){ switching = false; });
+    } else {
+      if(current){ current.classList.remove('tier--visible'); }
+      if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
+      setTimeout(function(){
+        if(current){ current.classList.remove('tier--active'); }
+        next.classList.add('tier--active');
+        // force a reflow so the transition triggers from the initial (hidden) state
+        void next.offsetWidth;
+        requestAnimationFrame(function(){
+          next.classList.add('tier--visible');
+        });
+        countUpPrices(next);
+        switching = false;
+      }, 260);
+    }
   }
 
   tabs.forEach(function(tab){
@@ -1804,9 +2074,12 @@
       rectLeft: tabsEl.getBoundingClientRect().left,
       meta: computeTabsMeta(),
       dragging: false,
-      nearest: null
+      nearest: null,
+      pointerId: e.pointerId
     };
-    tabsEl.setPointerCapture(e.pointerId);
+    // NOTE: the pointer is captured only once a real drag starts (see pointermove). Capturing on
+    // pointerdown made Chromium send the click to the tab bar instead of the button, so a plain
+    // mouse click on a tab did nothing.
     indicator.style.transition = 'none';
   });
 
@@ -1816,6 +2089,7 @@
       if(Math.abs(e.clientX - dragState.startX) < 4) return;
       dragState.dragging = true;
       tabsEl.classList.add('dragging');
+      try{ tabsEl.setPointerCapture(dragState.pointerId); }catch(err){}
     }
     followPointer(e.clientX, dragState);
   });
@@ -1871,9 +2145,13 @@
         document.documentElement.style.setProperty('--reveal-x', x + 'px');
         document.documentElement.style.setProperty('--reveal-y', y + 'px');
         document.documentElement.style.setProperty('--reveal-radius', endRadius + 'px');
+        document.documentElement.classList.add('theme-transition');
 
         var transition = document.startViewTransition(function(){ applyThemeSwap(next); });
         transition.ready.catch(function(){});
+        transition.finished.finally(function(){
+          document.documentElement.classList.remove('theme-transition');
+        });
       } else {
         applyThemeSwap(next);
       }
@@ -1898,6 +2176,57 @@
   // count up the prices of the panel that's visible on first load
   var initialPanel = document.querySelector('.tier--active');
   if(initialPanel){ countUpPrices(initialPanel); }
+
+  // ---------- promo banner + live countdown ----------
+  var promoEl = document.getElementById('promo');
+  var promoTimer = null;
+  var promoDigits = {};
+  var promoLast = {};
+  if(promoEl){
+    Array.prototype.forEach.call(promoEl.querySelectorAll('.promo-digit'), function(el){ promoDigits[el.dataset.unit] = el; });
+    var promoPctEl = document.getElementById('promoPct');
+    if(promoPctEl) promoPctEl.textContent = toFaDigits(PROMO.percent) + '٪';
+  }
+  function setPromoDigit(unit, value){
+    var text = toFaDigits((value < 10 ? '0' : '') + value);
+    if(promoLast[unit] === text) return;
+    var el = promoDigits[unit];
+    if(!el) return;
+    el.textContent = text;
+    if(promoLast[unit] !== undefined){            // skip the animation on first paint
+      el.classList.remove('tick');
+      void el.offsetWidth;                         // restart the CSS animation
+      el.classList.add('tick');
+    }
+    promoLast[unit] = text;
+  }
+  function endPromo(){
+    if(promoTimer){ clearInterval(promoTimer); promoTimer = null; }
+    if(promoEl) promoEl.hidden = true;
+    // prices fall back to normal on whatever panel is open (other panels refresh when opened)
+    var open = document.querySelector('.tier--active');
+    if(open) countUpPrices(open);
+  }
+  function promoTick(){
+    var now = Date.now();
+    if(now < PROMO.startMs || now >= PROMO.endMs){ endPromo(); return; }
+    var left = PROMO.endMs - now;
+    setPromoDigit('d', Math.floor(left / 86400000));
+    setPromoDigit('h', Math.floor((left % 86400000) / 3600000));
+    setPromoDigit('m', Math.floor((left % 3600000) / 60000));
+    setPromoDigit('s', Math.floor((left % 60000) / 1000));
+    promoEl.style.setProperty('--left', (left / (PROMO.endMs - PROMO.startMs)).toFixed(4));
+    var urgent = left <= 86400000;                 // last 24 hours: warmer colours + new label
+    promoEl.classList.toggle('is-urgent', urgent);
+    var tagText = document.getElementById('promoTagText');
+    if(tagText) tagText.textContent = urgent ? 'آخرین ۲۴ ساعت تخفیف!' : 'پیشنهاد ویژه · زمان محدود';
+  }
+  if(promoEl && promoActive()){
+    promoEl.hidden = false;
+    promoTick();
+    promoTimer = setInterval(promoTick, 1000);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden && promoTimer) promoTick(); });
+  }
 
   var renewalCheckbox = document.getElementById('renewalCheckbox');
   if(renewalCheckbox){
@@ -1979,6 +2308,8 @@
       var message = isRenewal
         ? 'سلام، می‌خوام سرویس ' + getPlanLabel(pendingRow) + ' رو تمدید کنم'
         : 'سلام، من سرویس ' + getPlanLabel(pendingRow) + ' رو می‌خوام';
+      // so the admin sees which price the customer saw
+      if(promoActive()){ message += ' (با تخفیف ' + toFaDigits(PROMO.percent) + '٪)'; }
       var url = 'https://t.me/WaliAdmin?text=' + encodeURIComponent(message);
       window.open(url, '_blank', 'noopener');
       if(selectedRow){ selectedRow.classList.remove('selected'); selectedRow = null; }
