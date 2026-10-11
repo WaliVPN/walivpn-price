@@ -438,7 +438,7 @@
   }
   .how-steps{
     position:relative;
-    display:flex; align-items:flex-start; justify-content:space-between;
+    display:flex; flex-direction:row-reverse; align-items:flex-start; justify-content:space-between;
     gap: 4px;
   }
   .how-steps::before{
@@ -616,36 +616,47 @@
      draws in and the rows settle one after another.  --tier-dir: +1 = unveil from the right. */
   @supports (view-transition-name: none){
     ::view-transition-group(tier-panel){
-      animation-duration: .42s;
+      animation-duration: .9s;
       animation-timing-function: cubic-bezier(.16,1,.3,1);
     }
     ::view-transition-image-pair(tier-panel){ isolation: isolate; }
     ::view-transition-old(tier-panel){
-      animation: tier-out .2s cubic-bezier(.4,0,1,1) both;
+      animation: tier-out .4s cubic-bezier(.45,0,.55,1) both;
       mix-blend-mode: normal;
     }
     ::view-transition-new(tier-panel){
-      animation: tier-in .42s cubic-bezier(.22,1,.36,1) both;
+      animation: tier-in .9s cubic-bezier(.22,1,.36,1) both;
       mix-blend-mode: normal;
     }
   }
+  /* a card turning on its edge: the old panel swings away, the new one swings in from the side the tab bar moved to */
   @keyframes tier-out{
-    to{ opacity: 0; transform: translateX(calc(var(--tier-dir, 1) * -28px)); }
+    to{ opacity: 0; transform: perspective(1000px) translateX(calc(var(--tier-dir, 1) * -34px)) rotateY(calc(var(--tier-dir, 1) * 26deg)) scale(.93); }
   }
   @keyframes tier-in{
-    from{ opacity: 0; transform: translateX(calc(var(--tier-dir, 1) * 36px)); }
-    to{ opacity: 1; transform: none; }
+    from{ opacity: 0; transform: perspective(1000px) translateX(calc(var(--tier-dir, 1) * 46px)) rotateY(calc(var(--tier-dir, 1) * -30deg)) scale(.93); }
+    40%{ opacity: 1; }
+    to{ opacity: 1; transform: perspective(1000px) none; }
   }
+  /* a soft tone-coloured light that sweeps over the incoming panel */
+  .tier--enter{ position: relative; overflow: hidden; }
+  .tier--enter::after{
+    content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+    background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--tone) 20%, transparent) 50%, transparent 70%);
+    transform: translateX(calc(var(--tier-dir, 1) * -130%));
+    animation: tier-sheen 1.4s .2s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes tier-sheen{ to{ transform: translateX(calc(var(--tier-dir, 1) * 130%)); } }
   /* inner choreography, only while a switch is playing */
-  .tier--enter::before{ transform-origin: right center; animation: tier-bar .5s .05s cubic-bezier(.22,1,.36,1) both; }
+  .tier--enter::before{ transform-origin: right center; animation: tier-bar .8s .15s cubic-bezier(.22,1,.36,1) both; }
   @keyframes tier-bar{ from{ transform: scaleX(0); } to{ transform: none; } }
-    .tier--enter li{ animation: tier-rise .42s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(.04s + var(--i, 0) * .04s); }
+    .tier--enter li{ animation: tier-rise .7s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(.15s + var(--i, 0) * .07s); }
   .tier--enter li:nth-child(1){ --i:0 } .tier--enter li:nth-child(2){ --i:1 } .tier--enter li:nth-child(3){ --i:2 }
   .tier--enter li:nth-child(4){ --i:3 } .tier--enter li:nth-child(5){ --i:4 } .tier--enter li:nth-child(6){ --i:5 }
   .tier--enter li:nth-child(n+7){ --i:6 }
   @keyframes tier-rise{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce){
-    .tier--enter::before, .tier--enter li{ animation: none; }
+    .tier--enter::before, .tier--enter::after, .tier--enter li{ animation: none; }
   }
 
   .tier[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
@@ -1985,7 +1996,7 @@
       next.classList.add('tier--active');
       next.classList.add('tier--visible');
       next.classList.add('tier--enter');
-      setTimeout(function(){ next.classList.remove('tier--enter'); }, 1100);
+      setTimeout(function(){ next.classList.remove('tier--enter'); }, 1900);
       if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
       countUpPrices(next, true);
     }
