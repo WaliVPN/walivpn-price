@@ -131,6 +131,13 @@
     .theme-toggle svg{ width:17px; height:17px; }
   }
 
+  /* keep the fixed buttons out of the page snapshot during tab switches, so the sliding panel can't pass over them */
+  :root:not(.theme-transition) .sticky-contact{ view-transition-name: sticky-contact; }
+  :root:not(.theme-transition) .theme-toggle{ view-transition-name: theme-toggle; }
+  ::view-transition-group(sticky-contact), ::view-transition-group(theme-toggle){ animation-duration: 0s; z-index: 10; }
+  ::view-transition-old(sticky-contact), ::view-transition-old(theme-toggle){ display:none; }
+  ::view-transition-new(sticky-contact), ::view-transition-new(theme-toggle){ animation: none; }
+
   /* ---------- Sticky contact button ---------- */
   .sticky-contact{
     position: fixed;
@@ -603,28 +610,42 @@
   .tier.tier--active{ display:block; }
   .tier.tier--visible{ opacity:1; transform: translateY(0) scale(1); }
 
-  /* ---------- Match-cut transition between tabs (View Transitions API) ---------- */
+  /* ---------- Tab transition (View Transitions API) ----------
+     Outgoing panel drifts away and softens; the incoming one is unveiled from the side
+     the tab bar moved toward (slide + fade only, compositor-friendly), then its accent bar
+     draws in and the rows settle one after another.  --tier-dir: +1 = unveil from the right. */
   @supports (view-transition-name: none){
     ::view-transition-group(tier-panel){
-      animation-duration: .4s;
-      animation-timing-function: cubic-bezier(.22,1,.36,1);
+      animation-duration: .42s;
+      animation-timing-function: cubic-bezier(.16,1,.3,1);
     }
     ::view-transition-image-pair(tier-panel){ isolation: isolate; }
     ::view-transition-old(tier-panel){
-      animation: mc-cut-out .2s cubic-bezier(.4,0,1,1) both;
+      animation: tier-out .2s cubic-bezier(.4,0,1,1) both;
       mix-blend-mode: normal;
     }
     ::view-transition-new(tier-panel){
-      animation: mc-cut-in .4s cubic-bezier(.22,1,.36,1) both;
+      animation: tier-in .42s cubic-bezier(.22,1,.36,1) both;
       mix-blend-mode: normal;
     }
   }
-  @keyframes mc-cut-out{
-    to{ opacity: 0; transform: scale(.97) translateX(calc(var(--tier-dir, 1) * -14px)); }
+  @keyframes tier-out{
+    to{ opacity: 0; transform: translateX(calc(var(--tier-dir, 1) * -28px)); }
   }
-  @keyframes mc-cut-in{
-    from{ opacity: 0; transform: scale(1.03) translateX(calc(var(--tier-dir, 1) * 14px)); }
-    to{ opacity: 1; transform: scale(1) translateX(0); }
+  @keyframes tier-in{
+    from{ opacity: 0; transform: translateX(calc(var(--tier-dir, 1) * 36px)); }
+    to{ opacity: 1; transform: none; }
+  }
+  /* inner choreography, only while a switch is playing */
+  .tier--enter::before{ transform-origin: right center; animation: tier-bar .5s .05s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes tier-bar{ from{ transform: scaleX(0); } to{ transform: none; } }
+    .tier--enter li{ animation: tier-rise .42s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(.04s + var(--i, 0) * .04s); }
+  .tier--enter li:nth-child(1){ --i:0 } .tier--enter li:nth-child(2){ --i:1 } .tier--enter li:nth-child(3){ --i:2 }
+  .tier--enter li:nth-child(4){ --i:3 } .tier--enter li:nth-child(5){ --i:4 } .tier--enter li:nth-child(6){ --i:5 }
+  .tier--enter li:nth-child(n+7){ --i:6 }
+  @keyframes tier-rise{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce){
+    .tier--enter::before, .tier--enter li{ animation: none; }
   }
 
   .tier[data-tone="blue"]{ --tone: var(--blue); --tone-soft: var(--blue-soft); }
@@ -1900,7 +1921,7 @@
     wrap.classList.add('has-promo');
   }
 
-  function countUpPrices(panel){
+  function countUpPrices(panel, instant){
     var nums = panel.querySelectorAll('.price-num');
     var onSale = promoActive();
     nums.forEach(function(el, i){
@@ -1910,6 +1931,7 @@
       var full = (renewalMode && !isUnlimited) ? Math.max(0, base - RENEWAL_DISCOUNT) : base;
       var target = onSale ? discounted(full) : full;
       setOldPrice(el, onSale ? full : null);
+      if(instant){ el.textContent = formatFa(target); return; }   // tab switch: no per-frame text updates while the panel is moving
       var duration = 650;
       var delay = Math.min(i * 35, 300);
       setTimeout(function(){
@@ -1952,7 +1974,8 @@
     var curIdx = current ? tabs.findIndex(function(t){ return t.dataset.target === current.dataset.tone; }) : -1;
     var nextIdx = tabs.findIndex(function(t){ return t.dataset.target === tone; });
     var dir = (curIdx === -1 || nextIdx > curIdx) ? 1 : -1;
-    document.documentElement.style.setProperty('--tier-dir', dir);
+    // RTL: a higher tab index sits further left, so the new panel is unveiled from the left
+    document.documentElement.style.setProperty('--tier-dir', -dir);
 
     var renewalToggleEl = document.querySelector('.renewal-toggle');
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1961,8 +1984,10 @@
       if(current){ current.classList.remove('tier--active'); current.classList.remove('tier--visible'); }
       next.classList.add('tier--active');
       next.classList.add('tier--visible');
+      next.classList.add('tier--enter');
+      setTimeout(function(){ next.classList.remove('tier--enter'); }, 1100);
       if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
-      countUpPrices(next);
+      countUpPrices(next, true);
     }
 
     if(document.startViewTransition && !reduceMotion){
