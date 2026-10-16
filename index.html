@@ -383,26 +383,41 @@
 
   /* ---------- Trust strip (live customer count) ---------- */
   .trust-strip{
-    display:inline-flex; align-items:center; gap:8px;
-    margin-top: 14px;
-    padding: 7px 14px 7px 12px;
-    border-radius: 999px;
-    background: var(--green-soft);
-    border: 1px solid rgba(32,191,161,.3);
+    display:inline-flex; align-items:stretch;
+    margin-top: 16px; max-width: 100%;
+    border-radius: 14px; overflow: hidden;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--green) 28%, var(--line));
+    box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--green) 80%, transparent);
     width: fit-content;
   }
+  .trust-live{
+    display:flex; align-items:center; gap:8px; padding: 9px 30px 9px 13px;
+    background: linear-gradient(270deg, color-mix(in srgb, var(--green) 16%, var(--surface)) 0%, color-mix(in srgb, var(--green) 14%, var(--surface)) 45%, transparent 100%);
+    color: var(--green);
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+  }
   .trust-dot{
-    width:8px; height:8px; border-radius:50%; background: var(--green); flex-shrink:0;
-    box-shadow: 0 0 0 0 rgba(32,191,161,.6);
+    width:7px; height:7px; border-radius:50%; background: var(--green); flex-shrink:0;
     animation: trust-pulse 2s ease-out infinite;
   }
   @keyframes trust-pulse{
-    0%{ box-shadow: 0 0 0 0 rgba(32,191,161,.55); }
-    70%{ box-shadow: 0 0 0 8px rgba(32,191,161,0); }
-    100%{ box-shadow: 0 0 0 0 rgba(32,191,161,0); }
+    0%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 55%, transparent); }
+    70%{ box-shadow: 0 0 0 7px transparent; }
+    100%{ box-shadow: 0 0 0 0 transparent; }
   }
-  .trust-strip-label{ font-size: 12px; font-weight: 600; color: var(--green); }
-  .trust-strip-label b{ font-weight: 800; }
+  .trust-strip-label{
+    display:flex; align-items:baseline; gap:7px; padding: 8px 14px;
+    font-size: 12.5px; font-weight: 500; color: var(--text-dim);
+  }
+  .trust-strip-label b{
+    font-size: 19px; font-weight: 800; color: var(--text); line-height: 1;
+    font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate;
+  }
+  @media (max-width: 400px){
+    .trust-live{ padding: 9px 22px 9px 10px; font-size: 11px; }
+    .trust-strip-label{ padding: 8px 10px; font-size: 12px; }
+  }
 
   /* ---------- Signature W divider ---------- */
   .w-divider{ width: 100%; height: 46px; margin: 44px 0 34px; overflow: hidden; }
@@ -1387,8 +1402,8 @@
     </div>
 
     <div class="trust-strip">
-      <span class="trust-dot"></span>
-      <span class="trust-strip-label">بیش از <b>۳۰۰ مشتری</b> هم‌زمان آنلاین روی سرویس‌های ما</span>
+      <span class="trust-live"><span class="trust-dot"></span>هم‌اکنون آنلاین</span>
+      <span class="trust-strip-label"><b>+۳۰۰</b> کاربر فعال هم‌زمان</span>
     </div>
   </header>
 
