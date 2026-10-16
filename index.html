@@ -387,9 +387,16 @@
     margin-top: 16px; max-width: 100%;
     border-radius: 14px; overflow: hidden;
     background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--green) 28%, var(--line));
+    position: relative;
     box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--green) 80%, transparent);
     width: fit-content;
+  }
+  /* outline: same green-to-neutral fade as the fill, drawn as a masked 1px ring */
+  .trust-strip::before{
+    content:""; position:absolute; inset:0; border-radius: inherit; padding: 1px; pointer-events:none;
+    background: linear-gradient(270deg, color-mix(in srgb, var(--green) 65%, transparent) 0%, color-mix(in srgb, var(--green) 30%, transparent) 40%, var(--line) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
   }
   .trust-live{
     display:flex; align-items:center; gap:8px; padding: 9px 30px 9px 13px;
