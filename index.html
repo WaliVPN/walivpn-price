@@ -675,27 +675,65 @@
 
   /* ---------- Plan list: flat editorial ledger, not stacked cards ---------- */
   .plan-list{ list-style:none; display:flex; flex-direction:column; }
-  .plan-row{
+  @property --rr{ syntax: '<length>'; inherits: false; initial-value: 0px; }
+  .plan-row, .unlimited-row{
+    position: relative; isolation: isolate;
     display:flex; align-items:center; justify-content:space-between; gap: 12px;
-    padding: 18px 2px;
-    border-bottom: 1px solid var(--line-soft);
-    border-right: 3px solid transparent;
+    margin: 0 -10px; padding: 18px 12px;
+    border-radius: 14px;
     cursor: pointer;
-    transition: border-color .18s ease, background-color .18s ease, padding-right .18s ease;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color .25s ease, box-shadow .25s ease, transform .2s cubic-bezier(.22,1,.36,1);
   }
-  .plan-list li:last-child .plan-row{ border-bottom: none; }
-  .plan-row:hover{
-    background: color-mix(in srgb, var(--tone) 6%, transparent);
-    border-right-color: color-mix(in srgb, var(--tone) 50%, transparent);
+  .unlimited-row{ padding-top: 20px; padding-bottom: 20px; }
+  .plan-list li, .unlimited-list li{ position: relative; }
+  .plan-list li:not(:last-child)::after, .unlimited-list li:not(:last-child)::after{
+    content:""; position:absolute; left: 12px; right: 12px; bottom: 0; height: 1px; background: var(--line); opacity:.7; pointer-events:none;
   }
+  /* accent bar on the leading edge: grows from the middle */
+  .plan-row::before, .unlimited-row::before{
+    content:""; position:absolute; right:0; top:50%; width:3px; height:0; border-radius:3px;
+    background: var(--tone); transform: translateY(-50%);
+    transition: height .3s cubic-bezier(.22,1,.36,1);
+  }
+  /* touch ripple, drawn from the exact point of the tap */
+  .plan-row::after, .unlimited-row::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:-1; opacity:0;
+    background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), color-mix(in srgb, var(--tone) 32%, transparent) 0, color-mix(in srgb, var(--tone) 14%, transparent) calc(var(--rr) * .6), transparent var(--rr));
+  }
+  .plan-row.rip::after, .unlimited-row.rip::after{ animation: row-ripple .7s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes row-ripple{
+    0%{ --rr: 0px; opacity: 1; }
+    70%{ opacity: 1; }
+    100%{ --rr: 520px; opacity: 0; }
+  }
+  .plan-gb, .unlimited-name{ transition: transform .3s cubic-bezier(.22,1,.36,1), color .2s ease; }
+  .plan-price{ transition: transform .3s cubic-bezier(.22,1,.36,1); }
 
-  .plan-row.selected{
-    border-right-color: var(--tone);
-    padding-right: 14px;
-    background: var(--tone-soft);
+  @media (hover: hover){
+    .plan-row:hover, .unlimited-row:hover{
+      background: linear-gradient(270deg, color-mix(in srgb, var(--tone) 13%, transparent) 0%, color-mix(in srgb, var(--tone) 3%, transparent) 100%);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent), 0 12px 26px -20px color-mix(in srgb, var(--tone) 80%, transparent);
+    }
+    .plan-row:hover::before, .unlimited-row:hover::before{ height: 52%; }
+    .plan-row:hover .plan-gb, .unlimited-row:hover .unlimited-name{ transform: translateX(-4px); }
+    .plan-row:hover .plan-price{ transform: translateX(4px); }
   }
+  .plan-row:active, .unlimited-row:active{ transform: scale(.985); }
+
+  .plan-row.selected, .unlimited-row.selected{
+    background: linear-gradient(270deg, color-mix(in srgb, var(--tone) 18%, transparent) 0%, color-mix(in srgb, var(--tone) 5%, transparent) 100%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 38%, transparent), 0 14px 30px -20px color-mix(in srgb, var(--tone) 90%, transparent);
+  }
+  .plan-row.selected::before, .unlimited-row.selected::before{ height: 68%; }
   .plan-row.selected .plan-gb,
-  .plan-row.selected .price-num{ color: var(--tone); }
+  .plan-row.selected .price-num,
+  .unlimited-row.selected .unlimited-name{ color: var(--tone); }
+  .plan-row.selected .plan-gb, .unlimited-row.selected .unlimited-name{ transform: translateX(-4px); }
+  @media (prefers-reduced-motion: reduce){
+    .plan-row.rip::after, .unlimited-row.rip::after{ animation: none; }
+    .plan-row, .unlimited-row, .plan-gb, .unlimited-name, .plan-price{ transition: none; }
+  }
 
   .plan-left{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 9px; min-width:0; }
   .plan-gb{ font-size: 19px; font-weight: 800; color: var(--text); white-space:nowrap; font-variant-numeric: tabular-nums; }
@@ -713,24 +751,6 @@
   .plan-price small{ font-weight: 500; color: var(--text-dim); font-size: 11.5px; margin-right: 3px; }
   /* ---------- Unlimited plan rows (used inside the "نامحدود" tab panel) ---------- */
   .unlimited-list{ list-style:none; display:flex; flex-direction:column; }
-  .unlimited-row{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding: 20px 2px;
-    border-bottom: 1px solid var(--line-soft);
-    border-right: 3px solid transparent;
-    cursor: pointer;
-    transition: border-color .18s ease, background-color .18s ease, padding-right .18s ease;
-  }
-  .unlimited-list li:last-child .unlimited-row{ border-bottom: none; }
-  .unlimited-row:hover{
-    background: color-mix(in srgb, var(--purple) 6%, transparent);
-    border-right-color: color-mix(in srgb, var(--purple) 50%, transparent);
-  }
-  .unlimited-row.selected{
-    border-right-color: var(--purple);
-    padding-right: 14px;
-    background: var(--purple-soft);
-  }
   .unlimited-left{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 9px; min-width:0; }
   .unlimited-name{ font-size: 18px; font-weight: 800; color: var(--text); }
   .badge--unlimited{ background: var(--purple); color:#fff; }
@@ -1266,7 +1286,7 @@
     .cta-box{ padding: 36px 22px; }
     .cta-btn{ width:100%; justify-content:center; }
     .tier{ padding: 24px 18px 20px; }
-    .plan-row{ padding: 13px 6px; gap:6px; }
+    .plan-row{ padding: 13px 10px; margin: 0 -6px; gap:6px; }
     .plan-gb{ font-size: 14px; }
     .plan-price{ font-size: 14px; }
     .platforms-list{ gap: 6px; }
@@ -1891,7 +1911,7 @@
   }
   // Renewal vs new purchase: for now they cost the same. Put a positive amount (تومان) here to bring
   // the renewal discount back — the price, the toggle label, the note and the FAQ all follow it.
-  var RENEWAL_DISCOUNT = 0;
+  var RENEWAL_DISCOUNT = 30000;
 
   // ---------- limited-time promo: ONE place to edit dates / percent ----------
   // Times are Tehran local (UTC+03:30). Outside [start, end) the site shows normal prices
@@ -2288,6 +2308,17 @@
   var selectableRows = document.querySelectorAll('.plan-row, .unlimited-row');
   var selectedRow = null;
   var pendingRow = null;
+
+  // touch / click ripple: starts exactly where the finger lands
+  selectableRows.forEach(function(row){
+    row.addEventListener('pointerdown', function(e){
+      var r = row.getBoundingClientRect();
+      row.style.setProperty('--rx', (e.clientX - r.left) + 'px');
+      row.style.setProperty('--ry', (e.clientY - r.top) + 'px');
+      row.classList.remove('rip'); void row.offsetWidth; row.classList.add('rip');
+    });
+    row.addEventListener('animationend', function(ev){ if(ev.animationName === 'row-ripple') row.classList.remove('rip'); });
+  });
 
   var confirmOverlay = document.getElementById('confirmOverlay');
   var confirmYesBtn = document.getElementById('confirmYesBtn');
