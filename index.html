@@ -1233,55 +1233,66 @@
   .section-title{
     text-align:center;
     font-size: 19px; font-weight: 800; color: var(--text);
-    margin-bottom: 18px;
+    margin-bottom: 6px;
   }
-  .faq-list{ display:flex; flex-direction:column; gap:10px; }
-  .faq-item{
+  .section-sub{ text-align:center; font-size: 13px; color: var(--text-faint); margin-bottom: 20px; }
+
+  /* one grouped card, hairline-separated rows; the open row is tinted and marked on its leading edge */
+  .faq-list{
+    display:flex; flex-direction:column;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow:hidden;
-    transition: border-color .2s ease;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -34px rgba(20,28,60,.35);
   }
-  @property --angle{
-    syntax: '<angle>';
-    initial-value: 0deg;
-    inherits: false;
+  .faq-item{
+    position: relative;
+    transition: background-color .3s ease;
   }
-  @keyframes border-spin{ to{ --angle: 360deg; } }
-
-  .faq-item.open{
-    border: 1.5px solid transparent;
-    background:
-      linear-gradient(var(--surface), var(--surface)) padding-box,
-      conic-gradient(from var(--angle), transparent 0%, var(--blue) 10%, transparent 28%, transparent 72%, var(--blue) 90%, transparent 100%) border-box;
-    animation: border-spin 2.6s linear infinite;
-    box-shadow: 0 0 20px 2px var(--blue-soft);
+  .faq-item + .faq-item{ border-top: 1px solid var(--line-soft); }
+  .faq-item::before{
+    content:""; position:absolute; right:0; top:50%; width:3px; height:0; border-radius:3px;
+    background: var(--blue); transform: translateY(-50%);
+    transition: height .35s cubic-bezier(.22,1,.36,1);
   }
+  .faq-item.open{ background: color-mix(in srgb, var(--blue) 5%, var(--surface)); }
+  .faq-item.open::before{ height: 55%; }
   .faq-question{
     width:100%;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
     background:none; border:none; cursor:pointer;
     font-family:inherit; text-align:right;
-    padding: 16px 18px;
-    font-size: 14px; font-weight: 700; color: var(--text);
+    padding: 18px 20px;
+    font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.7;
+    transition: color .2s ease;
   }
+  @media (hover: hover){ .faq-question:hover{ color: var(--blue); } }
   .faq-chevron{
-    width:18px; height:18px; flex-shrink:0; color: var(--text-faint);
-    transition: transform .3s ease, color .3s ease;
+    box-sizing: content-box; width:14px; height:14px; padding: 7px; flex-shrink:0; border-radius: 50%;
+    color: var(--text-dim); background: var(--line-soft);
+    transition: transform .35s cubic-bezier(.22,1,.36,1), color .25s ease, background-color .25s ease;
   }
-  .faq-item.open .faq-chevron{ transform: rotate(180deg); color: var(--blue); }
+  .faq-item.open .faq-chevron{ transform: rotate(180deg); color: #fff; background: var(--blue); }
   .faq-answer{
     display:grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows .35s ease;
+    transition: grid-template-rows .4s cubic-bezier(.22,1,.36,1);
   }
   .faq-answer-inner{ overflow:hidden; }
   .faq-item.open .faq-answer{ grid-template-rows: 1fr; }
   .faq-answer p{
-    padding: 0 18px 18px;
-    font-size: 13px; color: var(--text-dim); line-height: 1.85;
+    padding: 0 20px 20px;
+    font-size: 13.5px; color: var(--text-dim); line-height: 1.95;
   }
+  .faq-answer p:not(:last-child){ padding-bottom: 8px; }
+
+  .faq-help{
+    margin-top: 16px; display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap;
+    font-size: 13px; color: var(--text-dim);
+  }
+  .faq-help a{ color: var(--blue); font-weight: 700; text-decoration: none; }
+  .faq-help a:hover{ text-decoration: underline; text-underline-offset: 3px; }
 
   /* ---------- CTA / Footer ---------- */
   footer{ margin-top: 54px; padding: 46px 0 50px; border-top: 1px solid var(--line); }
@@ -1911,6 +1922,7 @@
 
     <div class="faq-section" id="faqSection">
       <h2 class="section-title">سوالات متداول</h2>
+      <p class="section-sub">پاسخ رایج‌ترین پرسش‌ها پیش از خرید</p>
       <div class="faq-list">
 
         <div class="faq-item">
@@ -1966,6 +1978,7 @@
         </div>
 
       </div>
+      <p class="faq-help">پاسخ سؤالتان را پیدا نکردید؟ <a href="https://t.me/WaliAdmin" target="_blank" rel="noopener">در تلگرام از ادمین بپرسید</a></p>
     </div>
   </main>
 
