@@ -1419,6 +1419,9 @@
     .sticky-contact{ bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
   }
 
+  .faq-answer p:not(:last-child){ padding-bottom: 8px; }
+  .faq-answer-inner strong{ color: var(--text); font-weight: 800; }
+
   /* ---------- Scroll reveal ---------- */
   .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.revealed{ opacity:1; transform:none; }
@@ -1879,7 +1882,7 @@
             <span class="why-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <h3 class="why-card-title">تضمین داریم</h3>
           </div>
-          <p class="why-card-desc">راضی نبودی؟ تا یک هفته وجهت رو برمی‌گردونیم.</p>
+          <p class="why-card-desc">راضی نبودی؟ تا یک هفته وجهت رو برمی‌گردونیم؛ این تضمین فقط برای سرویس‌های حجمیه.</p>
         </div>
         <div class="why-card" data-tone="purple">
           <div class="why-card-row">
@@ -1936,7 +1939,9 @@
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="faq-answer"><div class="faq-answer-inner">
-            <p>تا یک هفته از خرید فرصت داری ازش استفاده کنی و اگه راضی نبودی، وجهت رو پس بگیری. بعد از گذشت یک هفته، دیگه امکان عودت وجه نیست. اگه توی همون بازه‌ی یک‌هفته‌ای درخواست بدی، میزان مصرفت رو حساب می‌کنیم، هزینه‌ی همون مقدار مصرف رو کم می‌کنیم و باقی مبلغ رو بهت برمی‌گردونیم.</p>
+            <p><strong>تضمین عودت وجه فقط برای سرویس‌های حجمی است و سرویس‌های نامحدود شامل آن نمی‌شوند.</strong></p>
+            <p>برای سرویس‌های حجمی، تا یک هفته پس از خرید فرصت دارید از سرویس استفاده کنید و در صورت نارضایتی، درخواست عودت وجه بدهید. اگر درخواست در همین بازه‌ی یک‌هفته‌ای ثبت شود، میزان مصرف شما محاسبه می‌شود، هزینه‌ی همان مقدار از مبلغ کسر می‌شود و مابقی به شما بازگردانده می‌شود.</p>
+            <p>پس از گذشت یک هفته از خرید، امکان عودت وجه وجود ندارد.</p>
           </div></div>
         </div>
 
