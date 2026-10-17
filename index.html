@@ -483,7 +483,7 @@
   }
   .trust-strip-label b{
     font-size: 19px; font-weight: 800; color: var(--text); line-height: 1;
-    font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; position: relative; top: 1px;
   }
   @media (max-width: 400px){
     .trust-live{ padding: 9px 10px 9px 22px; font-size: 11px; }
@@ -914,27 +914,30 @@
   .note-list li::before{ content:"—"; color: var(--tone); flex-shrink:0; font-weight:800; }
 
   /* ---------- Inline warning box under the unlimited tab panel ---------- */
-  .tier-warning{
-    position:relative;
-    overflow:hidden;
-    margin-top: 18px;
-    padding: 18px 18px 16px;
+  /* "who is this for" guide in the unlimited tab: a calm card, two labelled groups, one warm accent for the cautions */
+  .tier-guide{
+    margin-top: 20px; padding: 18px 18px 6px;
     border-radius: 16px;
-    background: var(--orange-soft);
-    border: 1px solid rgba(239,154,63,.35);
+    background: var(--surface);
+    border: 1px solid var(--line);
   }
-  .tier-warning-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-  .tier-warning-icon{
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    width:32px; height:32px; border-radius:10px;
-    background: linear-gradient(155deg, var(--orange) 0%, color-mix(in srgb, var(--orange) 65%, var(--surface)) 100%);
-    box-shadow: 0 6px 14px -5px rgba(239,154,63,.5);
+  .tier-guide-head{ padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); }
+  .tier-guide-title{ display:block; font-size: 14.5px; font-weight: 800; color: var(--text); line-height: 1.6; text-wrap: balance; }
+  .tier-guide-sub{ display:block; margin-top: 2px; font-size: 12px; color: var(--text-faint); }
+  .tier-guide-group{ padding: 14px 0 15px; }
+  .tier-guide-group + .tier-guide-group{ border-top: 1px solid var(--line-soft); }
+  .tier-guide-label{ margin: 0 0 9px; font-size: 11.5px; font-weight: 800; letter-spacing: .1px; }
+  .tier-guide-group--yes .tier-guide-label{ color: var(--green); }
+  .tier-guide-group--no .tier-guide-label{ color: var(--orange); }
+  .tier-guide ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap: 9px; }
+  .tier-guide li{ display:flex; align-items:flex-start; gap: 10px; font-size: 13px; line-height: 1.75; color: var(--text); }
+  .tier-guide li i{
+    flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
   }
-  .tier-warning-icon svg{ width:16px; height:16px; color:#fff; }
-  .tier-warning-title{ font-size: 13.5px; font-weight: 800; color: var(--orange); }
-  .tier-warning ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:7px; }
-  .tier-warning li{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color: var(--text-dim); line-height:1.8; }
-  .tier-warning li::before{ content:"—"; color: var(--orange); flex-shrink:0; font-weight:800; }
+  .tier-guide li i svg{ width: 11px; height: 11px; display:block; }
+  .tier-guide-group--yes li i{ background: var(--green-soft); color: var(--green); }
+  .tier-guide-group--no li i{ background: var(--orange-soft); color: var(--orange); }
 
   /* ---------- Quality-score chip (under tier-meta) ---------- */
   .badge-row{
@@ -1793,17 +1796,26 @@
           </li>
         </ul>
 
-        <div class="tier-warning">
-          <div class="tier-warning-head">
-            <span class="tier-warning-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg></span>
-            <span class="tier-warning-title">سرویس نامحدود مناسب چه کسانیه؟</span>
+        <div class="tier-guide">
+          <div class="tier-guide-head">
+            <span class="tier-guide-title">این سرویس برای چه کسانی مناسب است؟</span>
+            <span class="tier-guide-sub">پیش از خرید، موارد زیر را مرور کنید.</span>
           </div>
-          <ul>
-            <li>اگر مصرف ماهانه‌تون زیر ۵۰ گیگ هست، اصلاً توصیه نمی‌شه.</li>
-            <li>اگر پیج اینستاگرام کاری دارین، توصیه نمی‌شه؛ چون آی‌پی‌ش متغیره.</li>
-            <li>اگر می‌خواین بازی آنلاین انجام بدین، اصلاً توصیه نمی‌شه.</li>
-            <li>فقط به‌درد مصارف خانگی و روزمره و عادی می‌خوره.</li>
-          </ul>
+          <div class="tier-guide-group tier-guide-group--yes">
+            <p class="tier-guide-label">مناسب برای</p>
+            <ul>
+              <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>استفاده‌ی خانگی و روزمره</li>
+              <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>مصرف ماهانه‌ی بالای ۵۰ گیگابایت</li>
+            </ul>
+          </div>
+          <div class="tier-guide-group tier-guide-group--no">
+            <p class="tier-guide-label">پیشنهاد نمی‌شود برای</p>
+            <ul>
+              <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7 7 17"/></svg></i>مصرف ماهانه‌ی کمتر از ۵۰ گیگابایت</li>
+              <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7 7 17"/></svg></i>مدیریت پیج کاری اینستاگرام، چون آی‌پی این سرویس ثابت نیست</li>
+              <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7 7 17"/></svg></i>بازی آنلاین</li>
+            </ul>
+          </div>
         </div>
         <button class="tier-test-cta" id="testBtnPurple" type="button">
           دریافت تست رایگان همین پلن
