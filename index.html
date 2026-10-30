@@ -639,7 +639,8 @@
     border-radius: 999px;
     background: var(--blue);
     box-shadow: 0 6px 18px rgba(84,104,255,.35);
-    transition: transform .4s cubic-bezier(.65,0,.35,1), width .4s cubic-bezier(.65,0,.35,1), background-color .4s ease, box-shadow .4s ease;
+    transition: none;            /* position, size, colour and glow are driven frame by frame by the spring in JS */
+    will-change: transform, width;
     z-index: 0;
     pointer-events: none;
   }
@@ -661,7 +662,11 @@
     transition: color .3s ease;
   }
   .tab:hover{ color: var(--text); }
-  .tab.active{ color: #fff; }
+  .tab.under{ color: #fff; }   /* labels turn white exactly when the moving pill covers them */
+  /* the label that was just chosen springs in as the pill lands on it */
+  .tab.pop{ animation: tab-pop .62s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes tab-pop{ 0%{ transform: scale(.9); } 55%{ transform: scale(1.07); } 100%{ transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce){ .tab.pop{ animation:none; } }
 
   .tab-sep{
     align-self: stretch;
@@ -718,6 +723,11 @@
     40%{ opacity: 1; }
     to{ opacity: 1; transform: perspective(1000px) none; }
   }
+  /* while a view transition plays, the browser lays an overlay over the page that swallows every tap;
+     let touches fall straight through so the tab bar stays responsive during the panel animation */
+  ::view-transition, ::view-transition-group(*), ::view-transition-image-pair(*),
+  ::view-transition-old(*), ::view-transition-new(*){ pointer-events: none; }
+
   /* a soft tone-coloured light that sweeps over the incoming panel */
   .tier--enter{ position: relative; overflow: hidden; }
   .tier--enter::after{
@@ -1308,6 +1318,77 @@
   .faq-help a{ color: var(--blue); font-weight: 700; text-decoration: none; }
   .faq-help a:hover{ text-decoration: underline; text-underline-offset: 3px; }
 
+  /* ---------- Partnership notice ---------- */
+  .partner{
+    --tone: var(--green); --tone-soft: var(--green-soft);
+    position:relative; isolation:isolate; overflow:hidden;
+    max-width: 640px; margin: 40px auto 0;
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    padding: 24px 22px;
+    border-radius: 22px;
+    background:
+      linear-gradient(255deg, color-mix(in srgb, var(--tone) 11%, transparent) 0%, transparent 62%),
+      var(--surface);
+    box-shadow: 0 18px 40px -30px color-mix(in srgb, var(--tone) 70%, transparent);
+  }
+  /* hairline border that fades from the plan colour into the normal line colour */
+  .partner::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; z-index:2;
+    background: linear-gradient(255deg, color-mix(in srgb, var(--tone) 60%, transparent), var(--line) 55%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  /* faint dot grid in the corner behind the button: a quiet "network" texture */
+  .partner::after{
+    content:""; position:absolute; z-index:-1; top:0; bottom:0; left:0; width:46%; pointer-events:none;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--tone) 38%, transparent) 1px, transparent 1.6px);
+    background-size: 14px 14px;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 85%);
+    mask-image: linear-gradient(90deg, #000 0%, transparent 85%);
+    opacity:.55;
+  }
+  .partner-icon{
+    width:52px; height:52px; flex-shrink:0; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--tone);
+    background: linear-gradient(150deg, color-mix(in srgb, var(--tone) 22%, transparent), color-mix(in srgb, var(--tone) 8%, transparent));
+    border: 1px solid color-mix(in srgb, var(--tone) 30%, transparent);
+  }
+  .partner-icon svg{ width:24px; height:24px; stroke-width:1.7; }
+  .partner-body{ flex:1; min-width:0; }
+  .partner-eyebrow{
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:7px;
+    font-size:11px; font-weight:700; letter-spacing:.1px; color: var(--tone);
+  }
+  .partner-eyebrow::before{ content:""; width:6px; height:6px; border-radius:50%; background: var(--tone); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 22%, transparent); }
+  .partner-title{ font-size: 17px; font-weight: 800; color: var(--text); line-height:1.5; }
+  .partner-points{ list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .partner-points li{ display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; color:var(--text); line-height:1.6; }
+  .partner-points i{
+    flex:0 0 auto; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:var(--tone); background: color-mix(in srgb, var(--tone) 16%, transparent);
+  }
+  .partner-points i svg{ width:11px; height:11px; display:block; }
+  .partner-desc{ margin-top: 10px; font-size: 12.5px; color: var(--text-dim); line-height: 1.85; }
+  .partner-cta{
+    flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding: 14px 22px; border-radius: 14px; text-decoration:none; white-space:nowrap;
+    font-size: 13.5px; font-weight: 800; line-height:1;
+    color:#fff; background: var(--tone);
+    box-shadow: 0 12px 24px -12px color-mix(in srgb, var(--tone) 85%, transparent), inset 0 1px 0 rgba(255,255,255,.18);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .partner-cta svg{ width:15px; height:15px; transition: transform .2s ease; }
+  .partner-cta:hover{ transform: translateY(-2px); box-shadow: 0 16px 28px -12px color-mix(in srgb, var(--tone) 90%, transparent), inset 0 1px 0 rgba(255,255,255,.18); }
+  .partner-cta:hover svg{ transform: translateX(-3px); }
+  .partner-cta:active{ transform: scale(.98); }
+  @media (max-width: 560px){
+    .partner{ padding: 22px 18px 18px; gap:16px; }
+    .partner-body{ flex-basis: calc(100% - 70px); }
+    .partner-cta{ width:100%; min-height:50px; }
+    .partner::after{ width:70%; top:auto; height:90px; bottom:0; -webkit-mask-image: linear-gradient(0deg, #000 0%, transparent 85%); mask-image: linear-gradient(0deg, #000 0%, transparent 85%); }
+  }
+
   /* ---------- CTA / Footer ---------- */
   footer{ margin-top: 54px; padding: 46px 0 50px; border-top: 1px solid var(--line); }
 
@@ -1433,6 +1514,7 @@
     .plans-section > .notes{ order: 8; }
     .plans-section > .why-us{ order: 9; }
     .plans-section > .faq-section{ order: 10; }
+    .plans-section > .partner{ order: 1; margin-top: 28px; }
 
     /* comfortable thumb targets */
     .tab{ padding: 15px 6px; font-size: 13.5px; }
@@ -1608,7 +1690,7 @@
         <span class="tab-indicator" aria-hidden="true"></span>
         <button class="tab" data-target="purple" role="tab" aria-selected="false" aria-controls="tier-purple">نامحدود</button>
         <span class="tab-sep" aria-hidden="true"></span>
-        <button class="tab active" data-target="blue" role="tab" aria-selected="true" aria-controls="tier-blue">یک‌ماهه</button>
+        <button class="tab active under" data-target="blue" role="tab" aria-selected="true" aria-controls="tier-blue">یک‌ماهه</button>
         <button class="tab" data-target="green" role="tab" aria-selected="false" aria-controls="tier-green">دوماهه</button>
         <button class="tab" data-target="orange" role="tab" aria-selected="false" aria-controls="tier-orange">سه‌ماهه</button>
       </div>
@@ -1881,6 +1963,23 @@
 
     </div>
 
+    <section class="partner" id="partnerSection" aria-labelledby="partnerTitle">
+      <span class="partner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <div class="partner-body">
+        <span class="partner-eyebrow">فرصت همکاری</span>
+        <h3 class="partner-title" id="partnerTitle">همکاری با ما</h3>
+        <ul class="partner-points">
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>با نام و برند خودتان بفروشید</li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>پشتیبانی فنی با ما، فروش با شما</li>
+        </ul>
+        <p class="partner-desc">برای اطلاع از شرایط همکاری، به ادمین پیام بدهید.</p>
+      </div>
+      <a class="partner-cta" href="https://t.me/WaliAdmin?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D9%85%DB%8C%E2%80%8C%D8%AE%D9%88%D8%A7%D9%85%20%D8%AF%D8%B1%D8%A8%D8%A7%D8%B1%D9%87%E2%80%8C%DB%8C%20%D8%B4%D8%B1%D8%A7%DB%8C%D8%B7%20%D9%87%D9%85%DA%A9%D8%A7%D8%B1%DB%8C%20%D8%A7%D8%B7%D9%84%D8%A7%D8%B9%D8%A7%D8%AA%20%D8%A8%DA%AF%DB%8C%D8%B1%D9%85" target="_blank" rel="noopener">
+        اطلاع از شرایط همکاری
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+    </section>
+
     <div class="platforms-strip">
       <p class="platforms-label">سازگار با همه‌ی دستگاه‌ها</p>
       <div class="platforms-list">
@@ -2055,6 +2154,8 @@
         <a href="https://t.me/WaliAdmin" target="_blank" rel="noopener">پشتیبانی</a>
         <span class="site-footer-dot">•</span>
         <a href="#faqSection">سوالات متداول</a>
+        <span class="site-footer-dot">•</span>
+        <a href="#partnerSection">همکاری</a>
       </nav>
 
       <div class="site-footer-bottom">
@@ -2162,25 +2263,97 @@
     });
   }
 
-  function moveIndicator(tab){
-    var tone = tab.dataset.target;
-    indicator.style.width = tab.offsetWidth + 'px';
-    indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
-    indicator.style.backgroundColor = toneHex(tone);
-    indicator.style.boxShadow = '0 6px 18px ' + toneShadow(tone);
+  // ---------- the pill: two independent springs, one per edge ----------
+  // The edge on the side it is travelling toward is stiff and quick, the trailing edge is softer and lags,
+  // so the pill stretches out and then gathers itself in. Everything is continuous and interruptible
+  // (a click mid-flight just retargets with the current velocity), the colour morphs along the path,
+  // and each label turns white only while the pill is actually under it.
+  var reduceIndicator = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ind = { L:0, R:0, vL:0, vR:0, tL:0, tR:0, c:[84,104,255], c0:[84,104,255], c1:[84,104,255], ctr0:0, ctr1:0, baseW:0, dir:1, raf:0, last:0 };
+  var LEAD = { k:300, z:.76 }, TRAIL = { k:110, z:.92 };
+
+  function indUnder(){
+    tabs.forEach(function(t){
+      var l = t.offsetLeft, w = t.offsetWidth;
+      var ov = Math.min(ind.R, l + w) - Math.max(ind.L, l);
+      t.classList.toggle('under', ov > w * 0.55);
+    });
   }
+  function indRender(){
+    var w = ind.R - ind.L;
+    var st = ind.baseW ? Math.max(0, Math.min(1, (w - ind.baseW) / (ind.baseW * 1.1))) : 0;
+    var rgb = ind.c.map(Math.round).join(',');
+    indicator.style.transform = 'translateX(' + ind.L + 'px) scaleY(' + (1 - .09 * st).toFixed(3) + ')';
+    indicator.style.width = w + 'px';
+    indicator.style.backgroundColor = 'rgb(' + rgb + ')';
+    indicator.style.boxShadow = '0 ' + (6 + 5 * st).toFixed(1) + 'px ' + (18 + 14 * st).toFixed(1) + 'px rgba(' + rgb + ',' + (.35 + .25 * st).toFixed(3) + ')';
+    indUnder();
+  }
+  function indSnap(L, R, rgb){
+    if(ind.raf){ cancelAnimationFrame(ind.raf); ind.raf = 0; }
+    ind.L = ind.tL = L; ind.R = ind.tR = R; ind.vL = ind.vR = 0; ind.last = 0;
+    ind.baseW = R - L; ind.c = ind.c0 = ind.c1 = rgb.slice();
+    indRender();
+  }
+  function indStep(ts){
+    if(!ind.last) ind.last = ts;
+    var dt = Math.min((ts - ind.last) / 1000, 1 / 20); ind.last = ts;
+    var pR = ind.dir > 0 ? LEAD : TRAIL, pL = ind.dir > 0 ? TRAIL : LEAD;
+    var n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+    for(var i = 0; i < n; i++){
+      ind.vR += (-pR.k * (ind.R - ind.tR) - 2 * pR.z * Math.sqrt(pR.k) * ind.vR) * h; ind.R += ind.vR * h;
+      ind.vL += (-pL.k * (ind.L - ind.tL) - 2 * pL.z * Math.sqrt(pL.k) * ind.vL) * h; ind.L += ind.vL * h;
+    }
+    var span = ind.ctr1 - ind.ctr0, p = span ? Math.max(0, Math.min(1, ((ind.L + ind.R) / 2 - ind.ctr0) / span)) : 1;
+    p = p * p * (3 - 2 * p);
+    ind.c = [0, 1, 2].map(function(k){ return lerp(ind.c0[k], ind.c1[k], p); });
+    var settled = Math.abs(ind.L - ind.tL) < .12 && Math.abs(ind.R - ind.tR) < .12 && Math.abs(ind.vL) < .25 && Math.abs(ind.vR) < .25;
+    if(settled){
+      ind.L = ind.tL; ind.R = ind.tR; ind.vL = ind.vR = 0; ind.c = ind.c1.slice(); ind.raf = 0; ind.last = 0;
+      ind.baseW = ind.R - ind.L; indRender(); return;
+    }
+    indRender();
+    ind.raf = requestAnimationFrame(indStep);
+  }
+  function moveIndicator(tab, animate){
+    var tone = tab.dataset.target;
+    var tL = tab.offsetLeft, tR = tab.offsetLeft + tab.offsetWidth, c1 = hexToRgb(toneHex(tone));
+    if(!animate || reduceIndicator || !ind.R){ indSnap(tL, tR, c1); return; }
+    ind.tL = tL; ind.tR = tR;
+    ind.c0 = ind.c.slice(); ind.c1 = c1;
+    ind.ctr0 = (ind.L + ind.R) / 2; ind.ctr1 = (tL + tR) / 2;
+    ind.dir = ind.ctr1 >= ind.ctr0 ? 1 : -1;
+    ind.baseW = Math.min(ind.R - ind.L, tR - tL);
+    if(ind.raf){ cancelAnimationFrame(ind.raf); ind.raf = 0; }
+    ind.last = performance.now() - 14;
+    indStep(performance.now());          // paint the first frame in the same task as the touch
+  }
+  var tabsElForIndicator = document.querySelector('.tabs');
 
   function activateTab(tab){
     tabs.forEach(function(t){ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
     tab.classList.add('active');
     tab.setAttribute('aria-selected','true');
-    moveIndicator(tab);
+    tab.classList.remove('pop'); void tab.offsetWidth; tab.classList.add('pop');
+    moveIndicator(tab, true);
   }
 
+  var queuedTone = null, activeVT = null;
+  function finishSwitch(){
+    switching = false; activeVT = null;
+    if(queuedTone){ var q = queuedTone; queuedTone = null; switchPanel(q); }
+  }
   function switchPanel(tone){
     var current = panels.find(function(p){ return p.classList.contains('tier--active'); });
     var next = panels.filter(function(p){ return p.dataset.tone === tone; })[0];
-    if(!next || next === current || switching) return;
+    if(!next) return;
+    if(switching){
+      // a switch is still playing: remember the latest request, fast-forward the running transition, run ours right after
+      queuedTone = tone;
+      if(activeVT && activeVT.skipTransition){ try{ activeVT.skipTransition(); }catch(err){} }
+      return;
+    }
+    if(next === current) return;
     switching = true;
 
     // direction-aware slide: which way the tab bar moved decides which way the panel slides
@@ -2207,7 +2380,8 @@
       // match-cut: same view-transition-name on every .tier, so the browser
       // morphs the outgoing panel straight into the incoming one.
       var vt = document.startViewTransition(swapDom);
-      vt.finished.finally(function(){ switching = false; });
+      activeVT = vt;
+      vt.finished.finally(finishSwitch);
     } else {
       if(current){ current.classList.remove('tier--visible'); }
       if(renewalToggleEl){ renewalToggleEl.style.display = (tone === 'purple') ? 'none' : ''; }
@@ -2220,7 +2394,7 @@
           next.classList.add('tier--visible');
         });
         countUpPrices(next);
-        switching = false;
+        finishSwitch();
       }, 260);
     }
   }
@@ -2279,17 +2453,20 @@
 
     var left = lerp(a.left, b.left, t);
     var width = lerp(a.width, b.width, t);
-    var color = lerpColor(a.color, b.color, t);
 
-    indicator.style.transform = 'translateX(' + left + 'px)';
-    indicator.style.width = width + 'px';
-    indicator.style.backgroundColor = color;
-    indicator.style.boxShadow = '0 6px 18px ' + color.replace('rgb', 'rgba').replace(')', ',.35)');
+    var ca = hexToRgb(a.color), cb = hexToRgb(b.color);
+    indSnap(left, left + width, [lerp(ca[0], cb[0], t), lerp(ca[1], cb[1], t), lerp(ca[2], cb[2], t)]);
 
     state.nearest = (t < 0.5) ? a : b;
   }
 
   tabsEl.addEventListener('pointerdown', function(e){
+    // respond the instant the finger / mouse goes down (waiting for the click on release adds a visible lag)
+    var hit = e.target.closest ? e.target.closest('.tab') : null;
+    if(hit && (e.button === 0 || e.pointerType === 'touch') && !hit.classList.contains('active')){
+      activateTab(hit);
+      switchPanel(hit.dataset.target);
+    }
     dragState = {
       startX: e.clientX,
       rectLeft: tabsEl.getBoundingClientRect().left,
@@ -2325,6 +2502,18 @@
     }
     dragState = null;
   }
+  // While the panel's view transition is playing the browser routes taps to the page root instead of the
+  // buttons. Catch those at the document and resolve the tab under the finger ourselves, so rapid switching
+  // never drops a tap.
+  document.addEventListener('pointerdown', function(e){
+    if(e.target !== document.documentElement && e.target !== document.body) return;
+    if(!(e.button === 0 || e.pointerType === 'touch')) return;
+    var hit = tabs.find(function(t){
+      var r = t.getBoundingClientRect();
+      return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    if(hit && !hit.classList.contains('active')){ activateTab(hit); switchPanel(hit.dataset.target); }
+  }, true);
   tabsEl.addEventListener('pointerup', endDrag);
   tabsEl.addEventListener('pointercancel', endDrag);
 
@@ -2470,7 +2659,7 @@
   }
 
   // ---------- scroll reveal (bidirectional — animates out again on scroll-up too) ----------
-  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item, .how-it-works, .why-card'));
+  var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.note, .cta-box, .faq-item, .how-it-works, .why-card, .partner'));
   revealTargets.forEach(function(el, i){
     el.classList.add('reveal');
     el.style.transitionDelay = ((i % 2) * 0.1) + 's';
