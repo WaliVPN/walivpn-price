@@ -1560,6 +1560,49 @@
   .faq-answer-inner strong{ color: var(--text); font-weight: 800; }
 
   /* ---------- Scroll reveal ---------- */
+
+  /* ---------- Join-the-channel prompt: centered modal over a blurred page ---------- */
+  .join-overlay{
+    position:fixed; inset:0; z-index:95; display:grid; place-items:center; padding: 20px;
+    background: rgba(6,9,18,.5); -webkit-backdrop-filter: blur(10px) saturate(1.15); backdrop-filter: blur(10px) saturate(1.15);
+    opacity:0; visibility:hidden; transition: opacity .35s ease, visibility 0s .35s;
+  }
+  :root[data-theme="light"] .join-overlay{ background: rgba(235,238,248,.55); }
+  .join-overlay.open{ opacity:1; visibility:visible; transition-delay:0s; }
+  .join-card{
+    position:relative; overflow:hidden; width:min(380px, 100%); padding: 34px 24px 20px; border-radius: 28px; text-align:center;
+    background:
+      radial-gradient(320px 200px at 50% -40px, rgba(42,171,238,.28), transparent 70%),
+      var(--surface);
+    border: 1px solid color-mix(in srgb, #2aabee 28%, var(--line));
+    box-shadow: 0 50px 90px -30px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04) inset;
+    transform: translateY(26px) scale(.94); transition: transform .5s cubic-bezier(.22,1.2,.36,1);
+  }
+  .join-overlay.open .join-card{ transform: none; }
+  .join-ico{ position:relative; width:76px; height:76px; margin: 0 auto 18px; border-radius:50%; display:grid; place-items:center; color:#fff;
+    background: linear-gradient(160deg,#3cc0ff,#1d80d4); box-shadow: 0 16px 34px -10px rgba(42,171,238,.75), 0 0 0 1px rgba(255,255,255,.25) inset; }
+  .join-ico::before, .join-ico::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid rgba(42,171,238,.55); animation: join-ring 2.8s ease-out infinite; }
+  .join-ico::after{ animation-delay:1.4s; }
+  @keyframes join-ring{ from{ transform: scale(1); opacity:.7; } to{ transform: scale(1.7); opacity:0; } }
+  .join-ico svg{ width:36px; height:36px; display:block; margin-right:3px; position:relative; z-index:1; }
+  .join-eyebrow{ display:inline-block; font-size:11.5px; font-weight:700; color:#2aabee; background: rgba(42,171,238,.12); border-radius:99px; padding:3px 12px; margin-bottom:10px; }
+  .join-title{ font-size: 21px; font-weight: 800; line-height:1.45; text-wrap: balance; }
+  .join-sub{ margin: 8px 0 18px; font-size: 13px; line-height:1.9; color: var(--text-dim); }
+  .join-perks{ list-style:none; margin: 0 0 20px; padding: 14px 14px; display:grid; gap: 12px; text-align:right; border-radius:16px; background: var(--surface-2); border:1px solid var(--line-soft); }
+  .join-perks li{ display:flex; align-items:center; gap:12px; font-size:13px; font-weight:600; line-height:1.5; }
+  .join-perks i{ flex:0 0 auto; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; color:#2aabee; background: rgba(42,171,238,.14); }
+  .join-perks svg{ width:14px; height:14px; display:block; }
+  .join-btn{ width:100%; border:0; font-family:inherit; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; line-height:1; }
+  .join-yes{ padding: 16px; border-radius:16px; color:#fff; font-size:15px; font-weight:800; background: linear-gradient(160deg,#3cc0ff,#1d80d4); box-shadow: 0 16px 30px -14px #2aabee, 0 1px 0 rgba(255,255,255,.3) inset; transition: transform .15s ease, box-shadow .15s ease; }
+  .join-yes:hover{ transform: translateY(-1px); box-shadow: 0 20px 34px -14px #2aabee, 0 1px 0 rgba(255,255,255,.3) inset; }
+  .join-yes:active{ transform: scale(.98); }
+  .join-yes svg{ width:18px; height:18px; }
+  .join-no{ margin-top:6px; padding: 12px; background:transparent; color: var(--text-faint); font-size:12.5px; font-weight:600; border-radius:12px; }
+  .join-no:hover{ color: var(--text-dim); }
+  .join-x{ position:absolute; top:12px; left:12px; width:30px; height:30px; border:0; border-radius:50%; background: var(--line-soft); color: var(--text-dim); cursor:pointer; display:grid; place-items:center; }
+  .join-x svg{ width:13px; height:13px; }
+  @media (prefers-reduced-motion: reduce){ .join-ico::before, .join-ico::after{ animation:none; display:none; } .join-card{ transition: none; transform:none; } }
+
   .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.revealed{ opacity:1; transform:none; }
 
@@ -2887,5 +2930,43 @@
 
 </script>
 
+
+<div class="join-overlay" id="joinOverlay" aria-hidden="true">
+  <div class="join-card" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
+    <button class="join-x" id="joinClose" type="button" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="join-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 4.1 2.9 11.2c-1.1.4-1.1 1.1-.2 1.4l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.3 4.8 3.6c.9.5 1.5.2 1.7-.8l3.2-15.3c.3-1.3-.5-1.9-1.5-1.1ZM8.5 13.6l9.9-6.2c.5-.3.9-.1.5.2l-8.2 7.4-.3 3.4-1.9-4.8Z"/></svg></div>
+    <span class="join-eyebrow">کانال رسمی WaliVPN</span>
+    <div class="join-title" id="joinTitle">هنوز عضو کانال ما نشدی؟</div>
+    <p class="join-sub">همه اطلاعیه‌های مهم اول از همه توی کانال منتشر می‌شه. با یک لمس عضو شو.</p>
+    <ul class="join-perks">
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>اطلاع از تخفیف‌ها و کدهای ویژه</li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>دریافت تست رایگان</li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>خبر سریع از وضعیت سرورها</li>
+    </ul>
+    <a class="join-btn join-yes" id="joinYes" href="https://t.me/WaliVPNShop" target="_blank" rel="noopener">عضویت در کانال</a>
+    <button class="join-btn join-no" id="joinNo" type="button">الان نه، بعداً</button>
+  </div>
+</div>
+<script>
+(function(){
+  var ov=document.getElementById('joinOverlay'); if(!ov) return;
+  // shown on every visit, whatever the visitor did last time
+  var yes=document.getElementById('joinYes');
+  function busy(){ return document.getElementById('confirmOverlay').classList.contains('open') || document.querySelector('.freetest-overlay.open'); }
+  function show(){
+    if(busy()){ setTimeout(show,4000); return; }
+    ov.classList.add('open'); ov.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+    setTimeout(function(){ try{ yes.focus({preventScroll:true}); }catch(e){} },350);
+  }
+  function hide(){ ov.classList.remove('open'); ov.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+  setTimeout(show, 5000);
+  yes.addEventListener('click',function(){ hide(); });
+  function later(){ hide(); }
+  document.getElementById('joinNo').addEventListener('click',later);
+  document.getElementById('joinClose').addEventListener('click',later);
+  ov.addEventListener('click',function(e){ if(e.target===ov) later(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && ov.classList.contains('open')) later(); });
+})();
+</script>
 </body>
 </html>
