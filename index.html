@@ -286,10 +286,12 @@
 
   /* ---------- Ambient floating orbs ---------- */
   .bg-orbs{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
-  .orb{ position:absolute; border-radius:50%; filter: blur(70px); opacity:.32; will-change: transform; }
-  .orb-a{ width:360px; height:360px; background:var(--blue); top:-90px; right:-70px; animation: float-a 16s ease-in-out infinite; }
-  .orb-b{ width:320px; height:320px; background:var(--green); top:38%; left:-100px; animation: float-b 19s ease-in-out infinite; }
-  .orb-c{ width:300px; height:300px; background:var(--orange); bottom:-60px; right:18%; animation: float-c 22s ease-in-out infinite; }
+  /* soft glow drawn as a gradient instead of filter: blur(70px): same look, but the browser no longer re-blurs
+     three huge moving layers every frame (that was what made the tab switch stutter) */
+  .orb{ position:absolute; border-radius:50%; opacity:.34; will-change: transform; transform: translateZ(0); }
+  .orb-a{ width:560px; height:560px; background: radial-gradient(closest-side, var(--blue) 0%, color-mix(in srgb, var(--blue) 45%, transparent) 45%, transparent 100%); top:-190px; right:-170px; animation: float-a 16s ease-in-out infinite; }
+  .orb-b{ width:500px; height:500px; background: radial-gradient(closest-side, var(--green) 0%, color-mix(in srgb, var(--green) 45%, transparent) 45%, transparent 100%); top:calc(38% - 90px); left:-200px; animation: float-b 19s ease-in-out infinite; }
+  .orb-c{ width:480px; height:480px; background: radial-gradient(closest-side, var(--orange) 0%, color-mix(in srgb, var(--orange) 45%, transparent) 45%, transparent 100%); bottom:-150px; right:calc(18% - 90px); animation: float-c 22s ease-in-out infinite; }
   @keyframes float-a{
     0%{ transform:translate(0,0) scale(1) rotate(0deg); }
     25%{ transform:translate(-90px,70px) scale(1.15) rotate(20deg); }
@@ -723,6 +725,13 @@
     40%{ opacity: 1; }
     to{ opacity: 1; transform: perspective(1000px) none; }
   }
+
+  /* ---------- Smoother tab switch ----------
+     While the panel animates, the rest of the page is not snapshotted (it is identical before and after,
+     and the root crossfade is off anyway), so every frame goes to the panel. Nothing is paused: the banner keeps moving. */
+  :root.tab-vt{ view-transition-name: none; }
+  .promo{ contain: layout paint; }
+
   /* while a view transition plays, the browser lays an overlay over the page that swallows every tap;
      let touches fall straight through so the tab bar stays responsive during the panel animation */
   ::view-transition, ::view-transition-group(*), ::view-transition-image-pair(*),
@@ -1603,6 +1612,63 @@
   .join-x svg{ width:13px; height:13px; }
   @media (prefers-reduced-motion: reduce){ .join-ico::before, .join-ico::after{ animation:none; display:none; } .join-card{ transition: none; transform:none; } }
 
+
+  /* ---------- Latest channel posts ----------
+     Built like the announcement patterns of status pages and design systems: a small category tag,
+     one clear title, a two-line summary, the key facts as separate tiles, one call to action. */
+  .news{
+    --tone:#2aabee; --tone-soft: rgba(42,171,238,.14); --warn: var(--orange); --warn-soft: var(--orange-soft);
+    max-width: 640px; margin: 0 auto 30px;
+  }
+  .news[hidden]{ display:none; }
+  .news-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 0 4px 12px; }
+  .news-title{ margin:0; font-size:17px; font-weight:800; }
+  .news-live{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color: var(--tone); }
+  .news-live i{ position:relative; width:7px; height:7px; border-radius:50%; background: var(--tone); }
+  .news-live i::after{ content:""; position:absolute; inset:0; border-radius:50%; background: var(--tone); animation: news-ping 2s ease-out infinite; }
+  @keyframes news-ping{ from{ transform: scale(1); opacity:.6; } to{ transform: scale(3.2); opacity:0; } }
+  .news-list{ display:grid; gap:14px; }
+  .news-post{
+    position:relative; overflow:hidden; padding: 20px 18px 18px; border-radius: 22px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--warn) 8%, transparent), transparent 150px), var(--surface);
+    border: 1px solid color-mix(in srgb, var(--warn) 24%, var(--line));
+    box-shadow: 0 24px 44px -34px color-mix(in srgb, var(--warn) 70%, transparent);
+  }
+  .news-tag{ display:inline-flex; align-items:center; gap:6px; padding: 4px 11px 4px 9px; border-radius:99px; font-size:12px; font-weight:800; color: var(--warn); background: var(--warn-soft); }
+  .news-tag svg{ width:14px; height:14px; display:block; }
+  .news-post-title{ display:block; margin: 12px 0 6px; font-size: 19px; font-weight: 800; line-height: 1.55; text-wrap: balance; }
+  .news-summary{ margin:0; font-size: 13.5px; line-height: 1.95; color: var(--text-dim); }
+  .news-points{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 16px 0 12px; }
+  .news-point{ padding: 14px 13px 13px; border-radius: 16px; background: color-mix(in srgb, var(--text) 4%, transparent); border: 1px solid var(--line-soft); min-width:0; }
+  .news-ico{ width:36px; height:36px; border-radius:11px; display:grid; place-items:center; color: var(--warn); background: var(--warn-soft); }
+  .news-ico svg{ width:19px; height:19px; display:block; }
+  .news-point strong{ display:block; margin-top:10px; font-size:14px; font-weight:800; line-height:1.5; }
+  .news-point p{ margin: 4px 0 0; font-size: 12px; line-height: 1.85; color: var(--text-dim); }
+  .news-note{ display:flex; gap:10px; align-items:flex-start; padding: 13px 14px; border-radius: 14px; background: var(--warn-soft); font-size: 12.5px; line-height: 1.95; }
+  .news-note svg{ flex:0 0 auto; width:18px; height:18px; margin-top:3px; color: var(--warn); }
+  .news-note p{ margin:0; }
+  .news-cta{
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-top: 16px; padding: 14px; border-radius: 14px;
+    font-size: 14px; font-weight: 800; color:#fff; text-decoration:none; line-height:1;
+    background: linear-gradient(160deg,#3cc0ff,#1d80d4); box-shadow: 0 14px 26px -14px #2aabee, 0 1px 0 rgba(255,255,255,.28) inset;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .news-cta:hover{ transform: translateY(-1px); }
+  .news-cta:active{ transform: scale(.98); }
+  .news-cta svg{ width:16px; height:16px; }
+  .news-all{ display:block; margin-top: 12px; text-align:center; font-size: 12.5px; font-weight: 700; color: var(--text-dim); text-decoration:none; }
+  .news-all:hover{ color: var(--tone); }
+  /* plain posts (from the channel feed): text, optional photo, read-more */
+  .news-text{ margin: 10px 0 0; font-size:14px; line-height:2; color: var(--text); white-space:pre-line; overflow-wrap:anywhere; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp: 4; overflow:hidden; }
+  .news-text.open{ display:block; -webkit-line-clamp: unset; overflow:visible; }
+  .news-text a{ color: var(--tone); text-decoration:none; }
+  .news-toggle{ display:inline-flex; align-items:center; gap:5px; margin-top:8px; padding:0; border:0; background:none; font-family:inherit; font-size:12.5px; font-weight:700; color: var(--tone); cursor:pointer; }
+  .news-toggle svg{ width:13px; height:13px; transition: transform .25s ease; }
+  .news-toggle[aria-expanded="true"] svg{ transform: rotate(180deg); }
+  .news-photo{ display:block; margin-top:12px; width:100%; max-height:220px; object-fit:cover; border-radius:14px; border:1px solid var(--line); background: var(--surface-2); }
+  @media (prefers-reduced-motion: reduce){ .news-live i::after{ animation:none; } }
+  @media (max-width: 400px){ .news-points{ gap:8px; } .news-point{ padding: 12px 11px; } .news-post{ padding: 18px 14px 16px; } }
+
   .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.revealed{ opacity:1; transform:none; }
 
@@ -1720,6 +1786,14 @@
       </div>
       <div class="promo-bar" aria-hidden="true"><i id="promoBarFill"></i></div>
     </div>
+    <section class="news" id="newsSection" aria-labelledby="newsTitle" hidden>
+      <div class="news-head">
+        <h3 class="news-title" id="newsTitle">آخرین اخبار کانال</h3>
+        <span class="news-live"><i aria-hidden="true"></i>زنده از تلگرام</span>
+      </div>
+      <div class="news-list" id="newsList"></div>
+      <a class="news-all" href="https://t.me/WaliVPNShop" target="_blank" rel="noopener">مشاهده همه پیام‌ها در کانال</a>
+    </section>
 
     <div class="how-it-works">
       <p class="how-title">چطور سفارش بدم؟</p>
@@ -2050,6 +2124,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
       </a>
     </section>
+
+
 
     <div class="platforms-strip">
       <p class="platforms-label">سازگار با همه‌ی دستگاه‌ها</p>
@@ -2413,6 +2489,7 @@
   var queuedTone = null, activeVT = null;
   function finishSwitch(){
     switching = false; activeVT = null;
+    document.documentElement.classList.remove('tab-vt');
     if(queuedTone){ var q = queuedTone; queuedTone = null; switchPanel(q); }
   }
   function switchPanel(tone){
@@ -2451,6 +2528,7 @@
     if(document.startViewTransition && !reduceMotion){
       // match-cut: same view-transition-name on every .tier, so the browser
       // morphs the outgoing panel straight into the incoming one.
+      document.documentElement.classList.add('tab-vt');
       var vt = document.startViewTransition(swapDom);
       activeVT = vt;
       vt.finished.finally(finishSwitch);
@@ -2966,6 +3044,107 @@
   document.getElementById('joinClose').addEventListener('click',later);
   ov.addEventListener('click',function(e){ if(e.target===ov) later(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && ov.classList.contains('open')) later(); });
+})();
+</script>
+
+<script>
+(function(){
+  // Address of the news Worker (see news-worker.js). Leave empty to use the manual list below.
+  var NEWS_API = '';
+  // Manual list, newest first. A post is either
+  //   rich:  { tag, icon, title, summary, points:[{icon,title,text}], note, url }
+  //   plain: { title?, text, photo?, url? }
+  var NEWS_POSTS = [
+    {
+      tag: 'اطلاعیه مهم', icon: 'alert',
+      title: 'فروش سرویس‌ها در شرایط جنگی ادامه دارد',
+      summary: 'فروش WaliVPN در شرایط جنگی هم متوقف نمی‌شود و همچنان می‌توانید سرویس‌ها را با قیمت مناسب و به‌صرفه تهیه کنید. فقط روش پرداخت فرق می‌کند.',
+      points: [
+        { icon: 'coin', title: 'فقط رمزارز', text: 'فروش فقط از طریق رمزارز انجام می‌شود.' },
+        { icon: 'card', title: 'بدون شماره کارت', text: 'واریز به شماره کارت‌هایی که از منابع دیگر گرفته‌اید با مسئولیت خود شماست.' }
+      ],
+      note: 'از همین حالا در یک صرافی معتبر ثبت‌نام و احراز هویت کنید. جزئیات خرید و پرداخت در زمان لازم از طریق ادمین اعلام می‌شود.',
+      url: 'https://t.me/WaliVPNShop/1076'
+    }
+  ];
+  var MAX = 4;
+  var sec=document.getElementById('newsSection'), list=document.getElementById('newsList');
+  if(!sec) return;
+  var promoEl=document.getElementById('promo');
+  function promoRunning(){ return promoEl && !promoEl.hidden; }       // the news takes the banner's place once the promo is over
+  var ICONS={
+    alert:'<path d="M12 3 2.5 19.5h19L12 3Z"/><path d="M12 10v4.5M12 17.6v.01"/>',
+    coin:'<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.5-1.4-2.8-1.4-1.6 0-2.7.8-2.7 2 0 3 5.6 1.2 5.6 4.2 0 1.2-1.2 2-2.9 2-1.4 0-2.5-.6-3-1.6M12 6.2v1.6M12 16.2v1.6"/>',
+    card:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h3"/><path d="M3 21 21 3"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.01"/>',
+    arrow:'<path d="M19 12H5M11 6l-6 6 6 6"/>'
+  };
+  function svg(name){
+    var el=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    el.setAttribute('viewBox','0 0 24 24'); el.setAttribute('fill','none'); el.setAttribute('stroke','currentColor');
+    el.setAttribute('stroke-width','2'); el.setAttribute('stroke-linecap','round'); el.setAttribute('stroke-linejoin','round'); el.setAttribute('aria-hidden','true');
+    el.innerHTML=ICONS[name]||ICONS.info; return el;       // icon paths are constants above, never post content
+  }
+  function mk(tag,cls,text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+  function linkify(el,text){            // plain text only; links are built as elements, never as HTML
+    var re=/(https?:\/\/[^\s<>"]+)/g, last=0, m;
+    while((m=re.exec(text))){
+      el.appendChild(document.createTextNode(text.slice(last,m.index)));
+      var a=document.createElement('a'); a.href=m[1]; a.target='_blank'; a.rel='noopener'; a.textContent=m[1].replace(/^https?:\/\//,'').slice(0,38);
+      el.appendChild(a); last=re.lastIndex;
+    }
+    el.appendChild(document.createTextNode(text.slice(last)));
+  }
+  function cta(post){
+    if(!/^https:\/\/t\.me\//.test(post.url||'')) return null;
+    var a=mk('a','news-cta'); a.href=post.url; a.target='_blank'; a.rel='noopener';
+    a.appendChild(mk('span',null,'ادامه در کانال')); a.appendChild(svg('arrow')); return a;
+  }
+  function renderRich(p){
+    var el=mk('article','news-post');
+    var tag=mk('span','news-tag'); tag.appendChild(svg(p.icon||'info')); tag.appendChild(mk('span',null,p.tag||'خبر')); el.appendChild(tag);
+    el.appendChild(mk('h4','news-post-title',p.title));
+    if(p.summary) el.appendChild(mk('p','news-summary',p.summary));
+    if(p.points && p.points.length){
+      var g=mk('div','news-points');
+      p.points.forEach(function(pt){
+        var c=mk('div','news-point'), ic=mk('span','news-ico'); ic.appendChild(svg(pt.icon)); c.appendChild(ic);
+        c.appendChild(mk('strong',null,pt.title)); c.appendChild(mk('p',null,pt.text)); g.appendChild(c);
+      });
+      el.appendChild(g);
+    }
+    if(p.note){ var n=mk('div','news-note'); n.appendChild(svg('info')); n.appendChild(mk('p',null,p.note)); el.appendChild(n); }
+    var c=cta(p); if(c) el.appendChild(c);
+    return el;
+  }
+  function renderPlain(p){
+    var el=mk('article','news-post');
+    if(p.title) el.appendChild(mk('h4','news-post-title',p.title));
+    if(p.text){ var t=mk('p','news-text'); t.dir='auto'; linkify(t,p.text); el.appendChild(t); }
+    if(p.photo && /^https:\/\//.test(p.photo)){ var im=mk('img','news-photo'); im.loading='lazy'; im.alt=''; im.referrerPolicy='no-referrer'; im.src=p.photo; el.appendChild(im); }
+    var c=cta(p); if(c) el.appendChild(c);
+    return el;
+  }
+  function render(posts){
+    list.textContent='';
+    posts.slice(0,MAX).forEach(function(p){ list.appendChild(p.points||p.summary ? renderRich(p) : renderPlain(p)); });
+  }
+  function fit(){                      // long plain posts start collapsed, with a "read more" toggle
+    list.querySelectorAll('.news-text').forEach(function(t){
+      if(t.scrollHeight <= t.clientHeight + 2) return;
+      var b=mk('button','news-toggle'); b.type='button'; b.setAttribute('aria-expanded','false');
+      b.appendChild(mk('span',null,'ادامه مطلب')); b.appendChild(svg('arrow')); b.lastChild.setAttribute('style','transform:rotate(-90deg)');
+      b.addEventListener('click',function(){ var o=t.classList.toggle('open'); b.setAttribute('aria-expanded',o); b.firstChild.textContent=o?'بستن':'ادامه مطلب'; });
+      t.parentNode.insertBefore(b,t.nextSibling);
+    });
+  }
+  function show(posts){ if(promoRunning()) return; render(posts); sec.hidden=false; fit(); }
+  if(!NEWS_API){ if(NEWS_POSTS.length) show(NEWS_POSTS); return; }
+  var ctl=window.AbortController?new AbortController():null, to=setTimeout(function(){ if(ctl) ctl.abort(); },8000);
+  fetch(NEWS_API,{signal:ctl?ctl.signal:undefined}).then(function(r){ return r.ok?r.json():Promise.reject(); }).then(function(j){
+    clearTimeout(to);
+    if(j && j.posts && j.posts.length) show(j.posts);       // nothing to show: the section stays hidden
+  }).catch(function(){ /* offline or Worker down: the section stays hidden */ });
 })();
 </script>
 </body>
