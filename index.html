@@ -1630,11 +1630,20 @@
   }
   @keyframes news-blink{ 50%{ opacity:.3; } }
 
+  .news-headl{ display:flex; align-items:center; gap:10px; }
+  .news-frame{ --glow:#f0641f; position:relative; }
+  .news-glows i{ --c:#f0641f; --k:.7; position:absolute; left:2%; right:2%; bottom:-52px; height:120px; opacity:0; transition:opacity .7s ease; pointer-events:none;
+    background:radial-gradient(closest-side, color-mix(in srgb,var(--c) 100%,transparent) 0%, color-mix(in srgb,var(--c) 62%,transparent) 28%, color-mix(in srgb,var(--c) 30%,transparent) 55%, color-mix(in srgb,var(--c) 9%,transparent) 80%, transparent 100%); }
+  .news-glows i[data-t="offer"]{ --c:#e0245e; }
+  .news-glows i[data-t="update"]{ --c:#12e0a8; --k:.95; }
+  .news-glows i[data-t="info"]{ --c:#4a63f0; --k:.75; }
+  .news-glows i.on{ opacity:var(--k); }
+  :root[data-theme="dark"] .news-glows i.on{ opacity:calc(var(--k) * .7); }
   .news-stack{
     position:relative; display:grid; grid-template-columns:minmax(0,1fr); overflow:hidden; border-radius:32px; touch-action:pan-y; user-select:none; -webkit-user-select:none;
     -webkit-tap-highlight-color:transparent; isolation:isolate; cursor:grab;
     background:color-mix(in srgb, var(--text) 9%, var(--surface));
-    box-shadow:0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent), 0 22px 36px -24px rgba(0,0,0,.55);
+    z-index:1; box-shadow:0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent);
   }
   .news-stack.drag{ cursor:grabbing; }
   .news-stack:focus-visible{ outline:2px solid var(--tone); outline-offset:3px; }
@@ -1654,7 +1663,10 @@
   .news-tag svg{ width:14px; height:14px; display:block; }
   .news-card .news-tag{ padding:0; background:none; color:#fff; font-size:14px; }
   .news-card .news-tag svg{ width:15px; height:15px; }
-  .news-bigico{ width:26px; height:26px; margin-inline-start:auto; display:block; opacity:.95; }
+  .news-card > .news-markwrap{ position:absolute; inset:0; z-index:0; border-radius:inherit; overflow:hidden; pointer-events:none; }
+  .news-markwrap > .news-mark{ will-change:transform; position:absolute; z-index:0; left:-34px; top:-30px; width:176px; height:176px; color:#fff; opacity:.2; transform:rotate(12deg); pointer-events:none;
+    -webkit-mask-image:linear-gradient(135deg,#000 15%,transparent 78%); mask-image:linear-gradient(135deg,#000 15%,transparent 78%); }
+  .news-mark svg{ width:100%; height:100%; display:block; stroke-width:1.15; }
   .news-new{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:10.5px; font-weight:800; color:#fff; background:rgba(255,255,255,.24); }
   .news-new i{ width:5px; height:5px; border-radius:50%; background:#fff; animation:news-blink 1.4s ease-in-out infinite; }
   .news-card-title{ margin:0 0 4px; font-size:18px; font-weight:800; line-height:1.6; text-wrap:balance; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
@@ -1672,8 +1684,12 @@
 
   .news-dots{ display:flex; justify-content:center; gap:6px; margin-top:12px; }
   .news-dots[hidden]{ display:none; }
-  .news-dots button{ width:6px; height:6px; padding:0; border:0; border-radius:99px; background:color-mix(in srgb, var(--text) 22%, transparent); cursor:pointer; transition:width .3s cubic-bezier(.22,1,.36,1), background .3s ease; }
-  .news-dots button.on{ width:20px; background:var(--tone); }
+  .news-dots button{ position:relative; overflow:hidden; width:6px; height:6px; padding:0; border:0; border-radius:99px; background:color-mix(in srgb, var(--text) 22%, transparent); cursor:pointer; transition:width .3s cubic-bezier(.22,1,.36,1), background .3s ease; }
+  .news-dots button.on{ width:26px; background:color-mix(in srgb, var(--tone) 30%, transparent); }
+  .news-dots button i{ position:absolute; inset:0; border-radius:inherit; background:var(--tone); transform:scaleX(0); transform-origin:100% 50%; }
+  .news-dots button.on i{ transform:scaleX(1); }
+  .news-dots.run button.on i{ animation:news-fill 5s linear var(--d,0ms) both; }
+  @keyframes news-fill{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
   .news-all{ display:block; margin-top:6px; padding-top:6px; text-align:center; font-size:12.5px; font-weight:700; color:var(--text-dim); text-decoration:none; }
   .news-all:hover{ color:var(--tone); }
   @media (prefers-reduced-motion: reduce){ .news-new i{ animation:none; } }
@@ -1720,7 +1736,7 @@
     background: linear-gradient(160deg,#3cc0ff,#1d80d4); box-shadow: 0 14px 26px -14px #2aabee, 0 1px 0 rgba(255,255,255,.28) inset;
   }
   .news-cta svg{ width:16px; height:16px; }
-  @media (prefers-reduced-motion: reduce){ .news-live i, .news-new i{ animation:none; } .news-card, .news-sheet{ transition:none; } }
+  @media (prefers-reduced-motion: reduce){ .news-dots.run button.on i{ animation:none; } .news-live i, .news-new i{ animation:none; } .news-card, .news-sheet{ transition:none; } }
   @media (max-width: 400px){ .news-points{ gap:8px; } .news-point{ padding: 12px 11px; } }
 
   .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
@@ -1842,10 +1858,10 @@
     </div>
     <section class="news" id="newsSection" aria-labelledby="newsTitle" hidden>
       <div class="news-head">
-        <h3 class="news-title" id="newsTitle">آخرین اخبار کانال</h3>
+        <div class="news-headl"><h3 class="news-title" id="newsTitle">آخرین اخبار کانال</h3></div>
         <span class="news-live"><i aria-hidden="true"></i><b>زنده از تلگرام</b></span>
       </div>
-      <div class="news-stack" id="newsList" tabindex="0" role="group" aria-roledescription="carousel" aria-label="آخرین اخبار"></div>
+      <div class="news-frame" id="newsFrame"><div class="news-glows" aria-hidden="true"><i data-t="important"></i><i data-t="offer"></i><i data-t="update"></i><i data-t="info"></i></div><div class="news-stack" id="newsList" tabindex="0" role="group" aria-roledescription="carousel" aria-label="آخرین اخبار"></div></div>
       <div class="news-dots" id="newsDots" role="tablist" aria-label="انتخاب خبر"></div>
       <a class="news-all" href="https://t.me/WaliVPNShop" target="_blank" rel="noopener">مشاهده همه پیام‌ها در کانال</a>
     </section>
@@ -3173,8 +3189,8 @@
     var el=mk('article','news-card'); el.dataset.type=p.type; el.setAttribute('aria-label',p.title);
     var top=mk('div','news-top'); top.appendChild(tagEl(p));
     if(p.isNew){ var n=mk('span','news-new'); n.appendChild(mk('i')); n.appendChild(mk('span',null,'جدید')); top.appendChild(n); }
-    var big=svg(p.icon); big.setAttribute('class','news-bigico'); top.appendChild(big);
     el.appendChild(top);
+    var mark=mk('span','news-mark'); mark.appendChild(svg(p.icon)); var wrap=mk('span','news-markwrap'); wrap.appendChild(mark); el.insertBefore(wrap,el.firstChild); el._m=mark;
     el.appendChild(mk('h4','news-card-title',p.title));
     if(p.summary) el.appendChild(mk('p','news-card-sum',p.summary));
     var rows=mk('div','news-rows');
@@ -3222,36 +3238,38 @@
   // container with a hairline border shows through around the cards while they travel.
   var stackEl=track, cards=[], dotEls=[], pos=0, W=1, GAP=12, raf=0, drag=null, moved=false;
   var reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var lastAct=-1;
+  var lastAct=-1, frameEl=document.getElementById('newsFrame');
   function paint(){
-    var n=cards.length, act=Math.max(0,Math.min(n-1,Math.round(pos)));
+    var n=cards.length, act=((Math.round(pos)%n)+n)%n;
     for(var k=0;k<n;k++){
-      var d=k-pos, a=d<0?-d:d, q=a>1?1:a, c=cards[k], st=c.style;
+      var d=k-pos; d-=n*Math.round(d/n);                                    // shortest way round, so the list loops
+      var a=d<0?-d:d, q=a>1?1:a, c=cards[k], st=c.style;
       if(a>=1.02){ if(c._vis!==false){ st.visibility='hidden'; c._vis=false; } continue; }
       if(c._vis!==true){ st.visibility='visible'; c._vis=true; }
       st.transform='translate3d('+(-d*(W+GAP)).toFixed(1)+'px,0,0) scale('+(1-.07*q).toFixed(4)+')';
       st.opacity=(1-.35*q).toFixed(3);
+      c._m.style.transform='translate3d('+(d*(W+GAP)*.38).toFixed(1)+'px,0,0) rotate(12deg)';       // icon lags behind the card: parallax
       var f=(1-q*1.6); f=f<0?0:f; c._r.style.opacity=f.toFixed(2); if(c._s) c._s.style.opacity=f.toFixed(2);
     }
-    if(act!==lastAct){ lastAct=act; dotEls.forEach(function(e,i){ e.classList.toggle('on',i===act); e.setAttribute('aria-selected',i===act); }); }
+    if(act!==lastAct){ lastAct=act; var ty=cards[act]._post.type; Array.prototype.forEach.call(frameEl.querySelectorAll('.news-glows i'),function(g){ g.classList.toggle('on',g.dataset.t===ty); }); dotEls.forEach(function(e,i){ e.classList.toggle('on',i===act); e.setAttribute('aria-selected',i===act); }); }
   }
   var paintQ=0;
   function paintSoon(){ if(!paintQ) paintQ=requestAnimationFrame(function(){ paintQ=0; paint(); }); }
   function settle(target,v){
-    cancelAnimationFrame(raf); target=Math.max(0,Math.min(cards.length-1,Math.round(target)));
-    if(reduce){ pos=target; paint(); return; }
+    cancelAnimationFrame(raf); target=Math.round(target);
+    if(reduce){ pos=target; paint(); autoplay(); return; }
     v=v||0; var last=performance.now();
     (function step(now){
       var dt=Math.min(.032,(now-last)/1000); last=now;
       v+=(190*(target-pos)-27*v)*dt; pos+=v*dt;                          // slightly under-damped spring: soft landing
-      if(Math.abs(target-pos)<.0008 && Math.abs(v)<.01){ pos=target; paint(); return; }
+      if(Math.abs(target-pos)<.0008 && Math.abs(v)<.01){ pos=target; paint(); autoplay(); return; }
       paint(); raf=requestAnimationFrame(step);
     })(last);
   }
-  function rubber(x){ var m=cards.length-1; return x<0 ? x*.3 : x>m ? m+(x-m)*.3 : x; }
+  function rubber(x){ return x; }
   stackEl.addEventListener('pointerdown',function(e){
     if(cards.length<2 || (e.pointerType==='mouse' && e.button!==0)) return;
-    cancelAnimationFrame(raf); cancelAnimationFrame(paintQ); paintQ=0; W=stackEl.clientWidth||W;
+    cancelAnimationFrame(raf); cancelAnimationFrame(paintQ); paintQ=0; W=stackEl.clientWidth||W; clearTimeout(apT); runFill(false);
     drag={x:e.clientX,y:e.clientY,p:pos,lx:e.clientX,lt:performance.now(),v:0,on:false,id:e.pointerId}; moved=false;
   });
   stackEl.addEventListener('pointermove',function(e){
@@ -3275,11 +3293,31 @@
     var c=e.target.closest && e.target.closest('.news-card'); if(c && c._post) openSheet(c._post);
   });
   stackEl.addEventListener('keydown',function(e){
-    var i=Math.round(pos);
+    var i=Math.round(pos); hold(9000);
     if(e.key==='ArrowRight'||e.key==='ArrowUp'){ e.preventDefault(); settle(i+1); }
     else if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ e.preventDefault(); settle(i-1); }
-    else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(cards[i]) openSheet(cards[i]._post); }
+    else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); var m=((i%cards.length)+cards.length)%cards.length; if(cards[m]) openSheet(cards[m]._post); }
   });
+  // ----- autoplay: every few seconds the next news slides in, so people notice there is more -----
+  var apT=0, hidden=false, visible=true, holdUntil=0, DELAY=5000;
+  function hold(ms){ holdUntil=Math.max(holdUntil,Date.now()+ms); }       // after the visitor touches it, wait longer before moving on
+  function runFill(on,delay){ dots.classList.remove('run'); if(!on) return; dots.style.setProperty('--d',(delay||0)+'ms'); void dots.offsetWidth; dots.classList.add('run'); }
+  function autoplay(){
+    clearTimeout(apT);
+    if(reduce || cards.length<2 || sec.hidden){ runFill(false); return; }
+    var extra=Math.max(0,holdUntil-Date.now());                    // after a touch: stay put a while, then the dot fills again
+    runFill(true,extra);
+    apT=setTimeout(function(){
+      var modalOpen=modal.classList.contains('open');
+      if(drag || document.hidden || !visible || modalOpen){ autoplay(); return; }
+      settle(Math.round(pos)+1);
+    },extra+DELAY);
+  }
+  if('IntersectionObserver' in window){ new IntersectionObserver(function(en){ visible=en[0].isIntersecting; if(visible) autoplay(); },{threshold:.4}).observe(stackEl); }
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) autoplay(); });
+  stackEl.addEventListener('pointerdown',function(){ hold(9000); });
+  stackEl.addEventListener('pointerenter',function(e){ if(e.pointerType==='mouse') hold(4000); });
+
   function measure(){ W=stackEl.clientWidth||1; paint(); }
   window.addEventListener('resize',measure);
   function render(posts){
@@ -3287,11 +3325,11 @@
     posts.slice(0,MAX).map(norm).forEach(function(p,i){
       var c=card(p); stackEl.appendChild(c); cards.push(c);
       var d=mk('button'); d.type='button'; d.setAttribute('role','tab'); d.setAttribute('aria-label','خبر '+(i+1));
-      d.addEventListener('click',function(){ settle(i); }); dots.appendChild(d); dotEls.push(d);
+      d.appendChild(mk('i')); d.addEventListener('click',function(){ var n=cards.length, cur=Math.round(pos), diff=((i-cur)%n+n)%n; if(diff>n/2) diff-=n; hold(9000); settle(cur+diff); }); dots.appendChild(d); dotEls.push(d);
     });
-    dots.hidden=cards.length<2; stackEl.style.cursor=cards.length<2?'pointer':'';
+    dots.hidden=cards.length<2; lastAct=-1; stackEl.style.cursor=cards.length<2?'pointer':'';
   }
-  function show(posts){ if(promoRunning()) return; render(posts); sec.hidden=false; measure(); }
+  function show(posts){ if(promoRunning()) return; render(posts); sec.hidden=false; measure(); autoplay(); }
   if(!NEWS_API){ if(NEWS_POSTS.length) show(NEWS_POSTS); return; }
   var ctl=window.AbortController?new AbortController():null, to=setTimeout(function(){ if(ctl) ctl.abort(); },8000);
   fetch(NEWS_API,{signal:ctl?ctl.signal:undefined}).then(function(r){ return r.ok?r.json():Promise.reject(); }).then(function(j){
