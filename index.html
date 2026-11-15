@@ -1634,15 +1634,17 @@
   .news-frame{ --glow:#f0641f; position:relative; }
   .news-glows i{ --c:#f0641f; --k:.7; position:absolute; left:2%; right:2%; bottom:-52px; height:120px; opacity:0; transition:opacity .7s ease; pointer-events:none;
     background:radial-gradient(closest-side, color-mix(in srgb,var(--c) 100%,transparent) 0%, color-mix(in srgb,var(--c) 62%,transparent) 28%, color-mix(in srgb,var(--c) 30%,transparent) 55%, color-mix(in srgb,var(--c) 9%,transparent) 80%, transparent 100%); }
-  .news-glows i[data-t="offer"]{ --c:#e0245e; }
-  .news-glows i[data-t="update"]{ --c:#12e0a8; --k:.95; }
-  .news-glows i[data-t="info"]{ --c:#4a63f0; --k:.75; }
+  .news-glows i[data-t="rose"]{ --c:#e0245e; }
+  .news-glows i[data-t="green"]{ --c:#12e0a8; --k:.95; }
+  .news-glows i[data-t="blue"]{ --c:#4a63f0; --k:.75; }
+  .news-glows i[data-t="violet"]{ --c:#8b5cf6; --k:.8; }
+  .news-glows i[data-t="teal"]{ --c:#10c8e8; --k:.85; }
   .news-glows i.on{ opacity:var(--k); }
   :root[data-theme="dark"] .news-glows i.on{ opacity:calc(var(--k) * .7); }
   .news-stack{
     position:relative; display:grid; grid-template-columns:minmax(0,1fr); overflow:hidden; border-radius:32px; touch-action:pan-y; user-select:none; -webkit-user-select:none;
     -webkit-tap-highlight-color:transparent; isolation:isolate; cursor:grab;
-    background:color-mix(in srgb, var(--text) 9%, var(--surface));
+    background:color-mix(in srgb, var(--dc,#888) 42%, #15151d); transition:background-color .6s ease;
     z-index:1; box-shadow:0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent);
   }
   .news-stack.drag{ cursor:grabbing; }
@@ -1653,9 +1655,11 @@
     border-radius:32px; color:#fff; text-align:right; will-change:transform, opacity; backface-visibility:hidden; min-width:0;
     background:linear-gradient(155deg, var(--g1), var(--g2)); box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
   }
-  .news-card[data-type="offer"]{ --g1:#ff4f6d; --g2:#d81b50; }
-  .news-card[data-type="update"]{ --g1:#19c39a; --g2:#0a8a73; }
-  .news-card[data-type="info"]{ --g1:#5b7cff; --g2:#3a4fd9; }
+  .news-card[data-hue="rose"]{ --g1:#ff4f6d; --g2:#d81b50; }
+  .news-card[data-hue="green"]{ --g1:#19c39a; --g2:#0a8a73; }
+  .news-card[data-hue="blue"]{ --g1:#5b7cff; --g2:#3a4fd9; }
+  .news-card[data-hue="violet"]{ --g1:#a074ff; --g2:#6a3fe0; }
+  .news-card[data-hue="teal"]{ --g1:#22cfee; --g2:#0a88b8; }
   .news-card::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:radial-gradient(240px 160px at 0% 0%, rgba(255,255,255,.22), transparent 70%); }
   .news-card > *{ position:relative; z-index:1; }
   .news-top{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
@@ -1682,14 +1686,18 @@
   .news-go{ flex:0 0 auto; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.24); }
   .news-go svg{ width:16px; height:16px; display:block; }
 
-  .news-dots{ display:flex; justify-content:center; gap:6px; margin-top:12px; }
+  /* progress dots: a frosted pill that takes the colour of the news on show; the active dot stretches (springy) into a bar that
+     fills over 5s with a glowing head sliding along it. Colour changes cross-fade with the cards. */
+  .news-dots{ --dc:#f0641f; --w:34px; display:flex; align-items:center; justify-content:center; gap:7px; width:max-content; max-width:100%; margin:12px auto 0; padding:7px 12px; border-radius:99px;
+    background:color-mix(in srgb, var(--dc) 13%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--dc) 24%, transparent);
+    transition:background-color .6s ease, box-shadow .6s ease; }
   .news-dots[hidden]{ display:none; }
-  .news-dots button{ position:relative; overflow:hidden; width:6px; height:6px; padding:0; border:0; border-radius:99px; background:color-mix(in srgb, var(--text) 22%, transparent); cursor:pointer; transition:width .3s cubic-bezier(.22,1,.36,1), background .3s ease; }
-  .news-dots button.on{ width:26px; background:color-mix(in srgb, var(--tone) 30%, transparent); }
-  .news-dots button i{ position:absolute; inset:0; border-radius:inherit; background:var(--tone); transform:scaleX(0); transform-origin:100% 50%; }
-  .news-dots button.on i{ transform:scaleX(1); }
-  .news-dots.run button.on i{ animation:news-fill 5s linear var(--d,0ms) both; }
-  @keyframes news-fill{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+  .news-dots button{ position:relative; overflow:hidden; flex:0 0 auto; width:7px; height:7px; padding:0; border:0; border-radius:99px; cursor:pointer;
+    background:color-mix(in srgb, var(--dc) 38%, transparent); transition:width .55s cubic-bezier(.34,1.56,.64,1), background-color .6s ease; }
+  .news-dots button.on{ width:var(--w); background:color-mix(in srgb, var(--dc) 26%, transparent); }
+  .news-dots button i{ position:absolute; inset:0; border-radius:inherit; background:var(--dc); clip-path:inset(0 0 0 100%); transition:background-color .6s ease; }
+  .news-dots.run button.on i{ animation:news-fill 5s linear both; animation-play-state:var(--ps,running); }
+  @keyframes news-fill{ from{ clip-path:inset(0 0 0 100%); } to{ clip-path:inset(0 0 0 0); } }
   .news-all{ display:block; margin-top:6px; padding-top:6px; text-align:center; font-size:12.5px; font-weight:700; color:var(--text-dim); text-decoration:none; }
   .news-all:hover{ color:var(--tone); }
   @media (prefers-reduced-motion: reduce){ .news-new i{ animation:none; } }
@@ -1861,7 +1869,7 @@
         <div class="news-headl"><h3 class="news-title" id="newsTitle">آخرین اخبار کانال</h3></div>
         <span class="news-live"><i aria-hidden="true"></i><b>زنده از تلگرام</b></span>
       </div>
-      <div class="news-frame" id="newsFrame"><div class="news-glows" aria-hidden="true"><i data-t="important"></i><i data-t="offer"></i><i data-t="update"></i><i data-t="info"></i></div><div class="news-stack" id="newsList" tabindex="0" role="group" aria-roledescription="carousel" aria-label="آخرین اخبار"></div></div>
+      <div class="news-frame" id="newsFrame"><div class="news-glows" aria-hidden="true"><i data-t="orange"></i><i data-t="rose"></i><i data-t="green"></i><i data-t="blue"></i><i data-t="violet"></i><i data-t="teal"></i></div><div class="news-stack" id="newsList" tabindex="0" role="group" aria-roledescription="carousel" aria-label="آخرین اخبار"></div></div>
       <div class="news-dots" id="newsDots" role="tablist" aria-label="انتخاب خبر"></div>
       <a class="news-all" href="https://t.me/WaliVPNShop" target="_blank" rel="noopener">مشاهده همه پیام‌ها در کانال</a>
     </section>
@@ -3123,9 +3131,16 @@
   // Address of the news Worker (see news-worker.js). Leave empty to use the manual list below.
   var NEWS_API = '';
   // Manual list, newest first. type: 'important' | 'offer' | 'update' | 'info'.
-  //   { type, isNew, tag, icon, title, summary, points:[{icon,title,text}], note, photo, url }
+  //   { type, hue, isNew, tag, icon, title, summary, points:[{icon,title,text}], note, photo, url }
   var NEWS_POSTS = [
-    { type:'update', isNew:true, tag:'به‌روزرسانی', icon:'server',
+    { type:'important', hue:'orange', isNew:true, tag:'اطلاعیه مهم', icon:'alert',
+      title:'هشدار درباره سرورهای ضریب ۳ (تانل)',
+      summary:'به سرورهایی که کنارشان «ضریب ۳ (تانل)» نوشته شده، در شرایط عادی وصل نشوید و فقط در شرایط خاص از آن‌ها استفاده کنید.',
+      points:[{icon:'server',title:'فقط در شرایط خاص',text:'هزینه نگهداری این سرورها بالاست؛ استفاده را به مواقع ضروری محدود کنید.'},
+              {icon:'alert',title:'مصرف ۳ برابر',text:'هر ۱ گیگابایت مصرف روی این سرورها، ۳ گیگابایت از حجم شما کم می‌شود.'}],
+      note:'ممنون از همراهی و درک شما.',
+      url:'https://t.me/WaliVPNShop/1044' },
+    { type:'update', hue:'green', isNew:false, tag:'به‌روزرسانی', icon:'server',
       title:'سرور جدید اضافه شد؛ اشتراک را آپدیت کنید',
       summary:'برای اینکه سرور جدید در لیست اتصال شما نمایش داده شود، لازم است اشتراک (Subscription) خود را در برنامه به‌روزرسانی کنید.',
       points:[{icon:'server',title:'سرور جدید',text:'یک سرور تازه به سرویس‌ها اضافه شده است.'},
@@ -3133,7 +3148,7 @@
       note:'اگر بعد از آپدیت اشتراک هم سرور جدید را ندیدید، به ادمین پیام بدهید.',
       url:'https://t.me/WaliVPNShop' },
     {
-      type: 'important', isNew: false, tag: 'اطلاعیه مهم', icon: 'alert',
+      type: 'important', hue: 'rose', isNew: false, tag: 'اطلاعیه مهم', icon: 'alert',
       title: 'فروش سرویس‌ها در شرایط جنگی ادامه دارد',
       summary: 'فروش WaliVPN در شرایط جنگی هم متوقف نمی‌شود و همچنان می‌توانید سرویس‌ها را با قیمت مناسب و به‌صرفه تهیه کنید. فقط روش پرداخت فرق می‌کند.',
       points: [
@@ -3186,7 +3201,7 @@
   function tagEl(p){ var t=mk('span','news-tag'); t.appendChild(svg(p.icon)); t.appendChild(mk('span',null,p.tag)); return t; }
 
   function card(p){
-    var el=mk('article','news-card'); el.dataset.type=p.type; el.setAttribute('aria-label',p.title);
+    var el=mk('article','news-card'); el.dataset.type=p.type; el.dataset.hue=p.hue; el._hue=p.hue; el.setAttribute('aria-label',p.title);
     var top=mk('div','news-top'); top.appendChild(tagEl(p));
     if(p.isNew){ var n=mk('span','news-new'); n.appendChild(mk('i')); n.appendChild(mk('span',null,'جدید')); top.appendChild(n); }
     el.appendChild(top);
@@ -3236,9 +3251,9 @@
   // Every card moves with the finger (the next one arrives from the left side of the box, the old one leaves to the right),
   // 12px apart, and the further a card is from the centre the smaller and fainter it is - so a darker rounded
   // container with a hairline border shows through around the cards while they travel.
-  var stackEl=track, cards=[], dotEls=[], pos=0, W=1, GAP=12, raf=0, drag=null, moved=false;
+  var downT=0, stackEl=track, cards=[], dotEls=[], pos=0, W=1, GAP=8, raf=0, drag=null, moved=false;
   var reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var lastAct=-1, frameEl=document.getElementById('newsFrame');
+  var lastAct=-1, frameEl=document.getElementById('newsFrame'), DOTC={orange:'#f0641f',rose:'#e0245e',green:'#0fb48c',blue:'#4a63f0',violet:'#8b5cf6',teal:'#0aa9cf'};
   function paint(){
     var n=cards.length, act=((Math.round(pos)%n)+n)%n;
     for(var k=0;k<n;k++){
@@ -3246,90 +3261,105 @@
       var a=d<0?-d:d, q=a>1?1:a, c=cards[k], st=c.style;
       if(a>=1.02){ if(c._vis!==false){ st.visibility='hidden'; c._vis=false; } continue; }
       if(c._vis!==true){ st.visibility='visible'; c._vis=true; }
-      st.transform='translate3d('+(-d*(W+GAP)).toFixed(1)+'px,0,0) scale('+(1-.07*q).toFixed(4)+')';
-      st.opacity=(1-.35*q).toFixed(3);
+      st.transform='translate3d('+(-d*(W+GAP)).toFixed(1)+'px,0,0) scale('+(1-.045*q).toFixed(4)+')';
+      st.opacity=(1-.22*q).toFixed(3);
       c._m.style.transform='translate3d('+(d*(W+GAP)*.38).toFixed(1)+'px,0,0) rotate(12deg)';       // icon lags behind the card: parallax
       var f=(1-q*1.6); f=f<0?0:f; c._r.style.opacity=f.toFixed(2); if(c._s) c._s.style.opacity=f.toFixed(2);
     }
-    if(act!==lastAct){ lastAct=act; var ty=cards[act]._post.type; Array.prototype.forEach.call(frameEl.querySelectorAll('.news-glows i'),function(g){ g.classList.toggle('on',g.dataset.t===ty); }); dotEls.forEach(function(e,i){ e.classList.toggle('on',i===act); e.setAttribute('aria-selected',i===act); }); }
+    if(act!==lastAct){ lastAct=act; var ty=cards[act]._hue; dots.style.setProperty('--dc',DOTC[ty]||DOTC.orange); frameEl.style.setProperty('--dc',DOTC[ty]||DOTC.orange); Array.prototype.forEach.call(frameEl.querySelectorAll('.news-glows i'),function(g){ g.classList.toggle('on',g.dataset.t===ty); }); dotEls.forEach(function(e,i){ e.classList.toggle('on',i===act); e.setAttribute('aria-selected',i===act); }); }
   }
   var paintQ=0;
   function paintSoon(){ if(!paintQ) paintQ=requestAnimationFrame(function(){ paintQ=0; paint(); }); }
   function settle(target,v){
-    cancelAnimationFrame(raf); target=Math.round(target);
-    if(reduce){ pos=target; paint(); autoplay(); return; }
+    cancelAnimationFrame(raf); target=Math.round(target); moving=true; apCut();
+    if(reduce){ pos=target; paint(); moving=false; apNext(); return; }
     v=v||0; var last=performance.now();
     (function step(now){
       var dt=Math.min(.032,(now-last)/1000); last=now;
       v+=(190*(target-pos)-27*v)*dt; pos+=v*dt;                          // slightly under-damped spring: soft landing
-      if(Math.abs(target-pos)<.0008 && Math.abs(v)<.01){ pos=target; paint(); autoplay(); return; }
+      if(Math.abs(target-pos)<.0008 && Math.abs(v)<.01){ pos=target; paint(); moving=false; apNext(); return; }
       paint(); raf=requestAnimationFrame(step);
     })(last);
   }
   function rubber(x){ return x; }
   stackEl.addEventListener('pointerdown',function(e){
     if(cards.length<2 || (e.pointerType==='mouse' && e.button!==0)) return;
-    cancelAnimationFrame(raf); cancelAnimationFrame(paintQ); paintQ=0; W=stackEl.clientWidth||W; clearTimeout(apT); runFill(false);
+    cancelAnimationFrame(raf); cancelAnimationFrame(paintQ); paintQ=0; W=stackEl.clientWidth||W; pressed=true; downT=performance.now(); apPause();
     drag={x:e.clientX,y:e.clientY,p:pos,lx:e.clientX,lt:performance.now(),v:0,on:false,id:e.pointerId}; moved=false;
   });
   stackEl.addEventListener('pointermove',function(e){
     if(!drag || e.pointerId!==drag.id) return;
     var dx=e.clientX-drag.x, dy=e.clientY-drag.y;
-    if(!drag.on){ if(Math.abs(dx)<6 || Math.abs(dx)<Math.abs(dy)) return; drag.on=true; moved=true; stackEl.classList.add('drag'); try{ stackEl.setPointerCapture(drag.id); }catch(_){} }
+    if(!drag.on){ if(Math.abs(dx)<6 || Math.abs(dx)<Math.abs(dy)) return; drag.on=true; moved=true; apCut(); stackEl.classList.add('drag'); try{ stackEl.setPointerCapture(drag.id); }catch(_){} }
     var now=performance.now(), dt=Math.max(1,now-drag.lt);
     drag.v=.75*drag.v+.25*((e.clientX-drag.lx)/W)/(dt/1000); drag.lx=e.clientX; drag.lt=now;
     pos=rubber(drag.p+dx/W); paintSoon();
   });
   function up(e){
     if(!drag || (e && e.pointerId!==drag.id)) return;
-    var was=drag.on, v=drag.v, base=Math.round(pos); drag=null; stackEl.classList.remove('drag');
-    if(!was) return;
+    var was=drag.on, v=drag.v, base=Math.round(pos); drag=null; pressed=false; stackEl.classList.remove('drag');
+    if(!was){ apResume(); return; }       // just held or tapped: the timer carries on where it stopped
     var t=Math.round(pos+v*.2); t=Math.max(base-1,Math.min(base+1,t)); settle(t,v*.6);
     setTimeout(function(){ moved=false; },80);
   }
   stackEl.addEventListener('pointerup',up); stackEl.addEventListener('pointercancel',up);
   stackEl.addEventListener('click',function(e){
-    if(moved){ e.preventDefault(); return; }
+    if(moved || performance.now()-downT>450){ e.preventDefault(); moved=false; return; }     // a drag or a long hold is not a tap
     var c=e.target.closest && e.target.closest('.news-card'); if(c && c._post) openSheet(c._post);
   });
   stackEl.addEventListener('keydown',function(e){
-    var i=Math.round(pos); hold(9000);
+    var i=Math.round(pos);
     if(e.key==='ArrowRight'||e.key==='ArrowUp'){ e.preventDefault(); settle(i+1); }
     else if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ e.preventDefault(); settle(i-1); }
     else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); var m=((i%cards.length)+cards.length)%cards.length; if(cards[m]) openSheet(cards[m]._post); }
   });
-  // ----- autoplay: every few seconds the next news slides in, so people notice there is more -----
-  var apT=0, hidden=false, visible=true, holdUntil=0, DELAY=5000;
-  function hold(ms){ holdUntil=Math.max(holdUntil,Date.now()+ms); }       // after the visitor touches it, wait longer before moving on
-  function runFill(on,delay){ dots.classList.remove('run'); if(!on) return; dots.style.setProperty('--d',(delay||0)+'ms'); void dots.offsetWidth; dots.classList.add('run'); }
-  function autoplay(){
-    clearTimeout(apT);
-    if(reduce || cards.length<2 || sec.hidden){ runFill(false); return; }
-    var extra=Math.max(0,holdUntil-Date.now());                    // after a touch: stay put a while, then the dot fills again
-    runFill(true,extra);
-    apT=setTimeout(function(){
-      var modalOpen=modal.classList.contains('open');
-      if(drag || document.hidden || !visible || modalOpen){ autoplay(); return; }
-      settle(Math.round(pos)+1);
-    },extra+DELAY);
+  // ----- autoplay: every 5s the next news slides in, so people notice there is more -----
+  // The dot's fill and the timer are one thing: while the visitor holds the box (finger down / mouse over) both pause
+  // and keep their progress; when they let go the remaining time simply continues. Dragging to another news starts a fresh 5s.
+  var DELAY=5000, apT=0, apRemain=DELAY, apStart=0, apNew=true, pressed=false, hover=false, moving=false, visible=true;
+  function blocked(){ return reduce || cards.length<2 || sec.hidden || document.hidden || !visible || pressed || hover || moving || modal.classList.contains('open'); }
+  function apCut(){ clearTimeout(apT); apT=0; apRemain=DELAY; apNew=true; dots.classList.remove('run'); }      // forget the current cycle
+  function apPause(){ if(!apT) return; clearTimeout(apT); apT=0; apRemain=Math.max(0,apRemain-(Date.now()-apStart)); dots.style.setProperty('--ps','paused'); }
+  function apResume(){
+    if(apT || blocked()) return;
+    if(apNew){ dots.classList.remove('run'); void dots.offsetWidth; dots.style.setProperty('--ps','running'); dots.classList.add('run'); apNew=false; }
+    else dots.style.setProperty('--ps','running');
+    apStart=Date.now();
+    apT=setTimeout(function(){ apT=0; apCut(); settle(Math.round(pos)+1); },apRemain);
   }
-  if('IntersectionObserver' in window){ new IntersectionObserver(function(en){ visible=en[0].isIntersecting; if(visible) autoplay(); },{threshold:.4}).observe(stackEl); }
-  document.addEventListener('visibilitychange',function(){ if(!document.hidden) autoplay(); });
-  stackEl.addEventListener('pointerdown',function(){ hold(9000); });
-  stackEl.addEventListener('pointerenter',function(e){ if(e.pointerType==='mouse') hold(4000); });
+  function apNext(){ apCut(); apResume(); }                                // start a fresh 5s (waits by itself while blocked)
+  setInterval(function(){ if(blocked()) apPause(); else apResume(); },300);   // reacts to hidden tab, off-screen box, open sheet, etc.
+  if('IntersectionObserver' in window){ new IntersectionObserver(function(en){ visible=en[0].isIntersecting; },{threshold:.4}).observe(stackEl); }
+  stackEl.addEventListener('pointerenter',function(e){ if(e.pointerType==='mouse'){ hover=true; apPause(); } });
+  stackEl.addEventListener('pointerleave',function(e){ if(e.pointerType==='mouse'){ hover=false; apResume(); } });
 
   function measure(){ W=stackEl.clientWidth||1; paint(); }
   window.addEventListener('resize',measure);
+  // Every news gets its own colour. A post can pick one with `hue` (orange, rose, green, blue, violet, teal); the rest take
+  // the first colour of the palette (starting from a default per category) that differs from both neighbours, the loop wrap included.
+  var HUES=['orange','rose','green','blue','violet','teal'], TYPEHUE={important:'orange',offer:'rose',update:'green',info:'blue'};
+  function assignHues(list){
+    var n=list.length;
+    list.forEach(function(p){ if(HUES.indexOf(p.hue)<0) p.hue=null; });
+    list.forEach(function(p,i){
+      if(p.hue) return;
+      var prev=list[(i-1+n)%n].hue, next=list[(i+1)%n].hue, start=Math.max(0,HUES.indexOf(TYPEHUE[p.type]));
+      for(var k=0;k<HUES.length;k++){ var h=HUES[(start+k)%HUES.length]; if(h!==prev && h!==next){ p.hue=h; break; } }
+      if(!p.hue) p.hue=HUES[start];
+    });
+    return list;
+  }
   function render(posts){
     stackEl.textContent=''; dots.textContent=''; cards=[]; dotEls=[]; pos=0;
-    posts.slice(0,MAX).map(norm).forEach(function(p,i){
+    var list=assignHues(posts.slice(0,MAX).map(norm));
+    list.forEach(function(p,i){
       var c=card(p); stackEl.appendChild(c); cards.push(c);
       var d=mk('button'); d.type='button'; d.setAttribute('role','tab'); d.setAttribute('aria-label','خبر '+(i+1));
-      d.appendChild(mk('i')); d.addEventListener('click',function(){ var n=cards.length, cur=Math.round(pos), diff=((i-cur)%n+n)%n; if(diff>n/2) diff-=n; hold(9000); settle(cur+diff); }); dots.appendChild(d); dotEls.push(d);
+      d.appendChild(mk('i')); d.addEventListener('click',function(){ var n=cards.length, cur=Math.round(pos), diff=((i-cur)%n+n)%n; if(diff>n/2) diff-=n; settle(cur+diff); }); dots.appendChild(d); dotEls.push(d);
     });
     dots.hidden=cards.length<2; lastAct=-1; stackEl.style.cursor=cards.length<2?'pointer':'';
   }
-  function show(posts){ if(promoRunning()) return; render(posts); sec.hidden=false; measure(); autoplay(); }
+  function show(posts){ if(promoRunning()) return; render(posts); sec.hidden=false; measure(); apNext(); }
   if(!NEWS_API){ if(NEWS_POSTS.length) show(NEWS_POSTS); return; }
   var ctl=window.AbortController?new AbortController():null, to=setTimeout(function(){ if(ctl) ctl.abort(); },8000);
   fetch(NEWS_API,{signal:ctl?ctl.signal:undefined}).then(function(r){ return r.ok?r.json():Promise.reject(); }).then(function(j){
