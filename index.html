@@ -3310,7 +3310,15 @@
   // Manual list, newest first. type: 'important' | 'offer' | 'update' | 'info'.
   //   { type, hue, isNew, tag, icon, title, summary, points:[{icon,title,text}], note, photo, url }
   var NEWS_POSTS = [
-    { type:'important', hue:'orange', isNew:true, tag:'اطلاعیه مهم', icon:'alert',
+    { type:'info', hue:'blue', isNew:true, tag:'طرح ویژه', icon:'bolt',
+      title:'سرور آلمان ۱ پنجشنبه‌شب و جمعه‌شب رایگان است',
+      summary:'پنجشنبه‌شب و جمعه‌شب، از ساعت ۲ تا ۷ صبح، سرور آلمان ۱ کاملاً رایگان در اختیار شماست؛ هر مقدار مصرف کنید، هیچ حجمی از اکانت کم نمی‌شود.',
+      points:[{icon:'bolt',title:'ساعت ۲ تا ۷ صبح',text:'فقط پنجشنبه‌شب و جمعه‌شب، در همین ساعات اعلام‌شده.'},
+              {icon:'server',title:'فقط آلمان ۱',text:'سایر سرورها شامل این طرح نیستند. این قوی‌ترین سرور ماست برای دانلودهای حجیم.'},
+              {icon:'info',title:'طرح آزمایشی',text:'برای بررسی عملکرد سرور و بازخورد شما اجرا می‌شود. کیفیت اینترنت خودتان هم روی سرعت دانلود اثر دارد.'}],
+      note:'منتظر نظرات شما هستیم 💙',
+      url:'https://t.me/WaliVPNShop' },
+    { type:'important', hue:'orange', isNew:false, tag:'اطلاعیه مهم', icon:'alert',
       title:'هشدار درباره سرورهای ضریب ۳ (تانل)',
       summary:'به سرورهایی که کنارشان «ضریب ۳ (تانل)» نوشته شده، در شرایط عادی وصل نشوید و فقط در شرایط خاص از آن‌ها استفاده کنید.',
       points:[{icon:'server',title:'فقط در شرایط خاص',text:'هزینه نگهداری این سرورها بالاست؛ استفاده را به مواقع ضروری محدود کنید.'},
