@@ -1607,8 +1607,10 @@
   .join-yes:hover{ transform: translateY(-1px); box-shadow: 0 20px 34px -14px #2aabee, 0 1px 0 rgba(255,255,255,.3) inset; }
   .join-yes:active{ transform: scale(.98); }
   .join-yes svg{ width:18px; height:18px; }
+  .join-btn:focus:not(:focus-visible){ outline:none; }
   .join-no{ margin-top:6px; padding: 12px; background:transparent; color: var(--text-faint); font-size:12.5px; font-weight:600; border-radius:12px; }
   .join-no:hover{ color: var(--text-dim); }
+
   .join-x{ position:absolute; top:12px; left:12px; width:30px; height:30px; border:0; border-radius:50%; background: var(--line-soft); color: var(--text-dim); cursor:pointer; display:grid; place-items:center; }
   .join-x svg{ width:13px; height:13px; }
   @media (prefers-reduced-motion: reduce){ .join-ico::before, .join-ico::after{ animation:none; display:none; } .join-card{ transition: none; transform:none; } }
@@ -3289,7 +3291,6 @@
   function show(){
     if(busy()){ setTimeout(show,4000); return; }
     ov.classList.add('open'); ov.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-    setTimeout(function(){ try{ yes.focus({preventScroll:true}); }catch(e){} },350);
   }
   function hide(){ ov.classList.remove('open'); ov.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
   setTimeout(show, 5000);
