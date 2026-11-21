@@ -94,7 +94,12 @@
   :root.theme-transition .tier{ view-transition-name: none; }
   /* scoped: only the theme-toggle click adds this class, so it never fires during a tab switch */
   :root.theme-transition::view-transition-new(root){
-    animation: theme-reveal .65s cubic-bezier(.65,0,.35,1);
+    animation: theme-fade .45s ease both;
+  }
+  @keyframes theme-fade{ from{ opacity:0; } to{ opacity:1; } }
+  /* fallback (no View Transitions, e.g. older iOS): fade colours on every element for a moment */
+  :root.theme-fade *, :root.theme-fade *::before, :root.theme-fade *::after{
+    transition: background-color .45s ease, color .45s ease, border-color .45s ease, fill .45s ease, stroke .45s ease, box-shadow .45s ease !important;
   }
 
   *{ box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
@@ -922,7 +927,7 @@
   /* ---------- Notes ---------- */
   .notes{
     margin-top: 20px;
-    max-width: 640px;
+    max-width: 960px;
     margin-left:auto; margin-right:auto;
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -2972,23 +2977,18 @@
       themeManuallySet = true;
 
       if(document.startViewTransition && !reduceMotion){
-        var rect = themeToggleBtn.getBoundingClientRect();
-        var x = rect.left + rect.width / 2;
-        var y = rect.top + rect.height / 2;
-        var endRadius = Math.hypot(
-          Math.max(x, window.innerWidth - x),
-          Math.max(y, window.innerHeight - y)
-        );
-        document.documentElement.style.setProperty('--reveal-x', x + 'px');
-        document.documentElement.style.setProperty('--reveal-y', y + 'px');
-        document.documentElement.style.setProperty('--reveal-radius', endRadius + 'px');
         document.documentElement.classList.add('theme-transition');
-
         var transition = document.startViewTransition(function(){ applyThemeSwap(next); });
         transition.ready.catch(function(){});
         transition.finished.finally(function(){
           document.documentElement.classList.remove('theme-transition');
         });
+      } else if(!reduceMotion){
+        var root = document.documentElement;
+        root.classList.add('theme-fade');
+        applyThemeSwap(next);
+        clearTimeout(themeToggleBtn._t);
+        themeToggleBtn._t = setTimeout(function(){ root.classList.remove('theme-fade'); }, 550);
       } else {
         applyThemeSwap(next);
       }
