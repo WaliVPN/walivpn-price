@@ -33,6 +33,7 @@
   (function(){
     var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
     document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+    document.documentElement.style.colorScheme = prefersLight ? 'light' : 'dark';
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,24 +84,15 @@
     --purple-soft: rgba(199,42,92,.10);
   }
 
-  /* ---------- Theme-toggle circular reveal (View Transitions API) ---------- */
-  ::view-transition-old(root),
-  ::view-transition-new(root){
-    animation: none;
-    mix-blend-mode: normal;
-  }
-  ::view-transition-old(root){ z-index: 1; }
-  ::view-transition-new(root){ z-index: 2; }
-  /* ---------- Theme switch: circular reveal growing out of the toggle button (nothing is paused or disabled) ---------- */
-  :root.theme-revealing .tier{ view-transition-name: none; }
-  :root.theme-revealing::view-transition-old(root){ animation: none; }
-  :root.theme-revealing::view-transition-new(root){ animation: theme-reveal .65s cubic-bezier(.65,0,.35,1) both; }
-  @keyframes theme-reveal{
-    from{ clip-path: circle(0px at var(--rx,50%) var(--ry,50%)); }
-    to{ clip-path: circle(var(--rr,150%) at var(--rx,50%) var(--ry,50%)); }
-  }
-  /* browsers without View Transitions: quick fade through a GPU-only veil */
-  .theme-veil{ position:fixed; inset:0; z-index:39; pointer-events:none; opacity:0; will-change:opacity; }
+  /* ---------- Theme switch: soft dip ----------
+     A translucent veil in the incoming theme's colour fades in, the theme flips underneath it, and the veil fades out.
+     Opacity only (GPU, no page snapshot), and the page never goes fully blank. */
+  /* the instant the theme flips, nothing may tween: every colour lands in one frame, so the snapshot never catches a half-faded card
+     (the toggle's own icon morph is the one thing that keeps animating) */
+  :root.theme-snap *, :root.theme-snap *::before, :root.theme-snap *::after{ transition: none !important; }
+  :root.theme-snap .theme-toggle svg{ transition: opacity .25s ease, transform .35s ease !important; }
+
+    .theme-veil{ position:fixed; inset:0; z-index:39; pointer-events:none; opacity:0; will-change:opacity; }
 
   *{ box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
   html{ scroll-behavior: smooth; }
@@ -3012,25 +3004,39 @@
   var themeManuallySet = false;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function applyThemeSwap(next){
-    document.documentElement.setAttribute('data-theme', next);
+  var THEME_BG = { dark:'#0a0d13', light:'#f5f6fa' };
+    var themeBusy = false;
+
+  // the browser UI colour + native scrollbars/form controls must follow the chosen theme too, not only the OS one
+  function setThemeMeta(next){
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    for(var i = 0; i < metas.length; i++){
+      if(i === 0){ metas[i].removeAttribute('media'); metas[i].setAttribute('content', THEME_BG[next]); }
+      else if(metas[i].parentNode){ metas[i].parentNode.removeChild(metas[i]); }
+    }
+  }
+  // the one place the theme actually changes: transitions are muted for exactly this style recalc,
+  // so every element lands on its new colour at once (no half-faded cards)
+  function flipTheme(next){
+    var root = document.documentElement;
+    root.classList.add('theme-snap');
+    root.setAttribute('data-theme', next);
+    root.style.colorScheme = next;
+    setThemeMeta(next);
+    void root.offsetWidth;                       // flush styles while transitions are off
+    root.classList.remove('theme-snap');
     var active = document.querySelector('.tab.active');
     if(active) moveIndicator(active);
   }
-
-  var THEME_BG = { dark:'#0a0d13', light:'#f5f6fa' };
-  var themeBusy = false;
-  function flipTheme(next){ applyThemeSwap(next); }
   function veilSwap(next, done){
-    var root = document.documentElement;
     var veil = document.createElement('div');
     veil.className = 'theme-veil';
     veil.style.background = THEME_BG[next];
     document.body.appendChild(veil);
-    veil.animate([{ opacity:0 }, { opacity:1 }], { duration: 170, easing:'ease-out', fill:'forwards' }).onfinish = function(){
-      flipTheme(next);
+    veil.animate([{ opacity:0 }, { opacity:.72 }], { duration: 170, easing:'ease-out', fill:'forwards' }).onfinish = function(){
+      flipTheme(next);                           // the heavy restyle lands while the veil is up
       requestAnimationFrame(function(){ requestAnimationFrame(function(){
-        veil.animate([{ opacity:1 }, { opacity:0 }], { duration: 330, easing:'ease-in-out', fill:'forwards' })
+        veil.animate([{ opacity:.72 }, { opacity:0 }], { duration: 360, easing:'ease-in-out', fill:'forwards' })
           .onfinish = function(){ veil.remove(); done(); };
       }); });
     };
@@ -3042,20 +3048,13 @@
       var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       themeManuallySet = true;
       if(reduceMotion){ flipTheme(next); return; }
+
       themeBusy = true;
       var release = function(){ themeBusy = false; };
-      if(document.startViewTransition){
-        var r = themeToggleBtn.getBoundingClientRect();
-        var x = r.left + r.width/2, y = r.top + r.height/2;
-        root.style.setProperty('--rx', x+'px');
-        root.style.setProperty('--ry', y+'px');
-        root.style.setProperty('--rr', Math.ceil(Math.hypot(Math.max(x, innerWidth-x), Math.max(y, innerHeight-y)))+'px');
-        root.classList.add('theme-revealing');
-        var vt = document.startViewTransition(function(){ flipTheme(next); });
-        vt.finished.finally(function(){ root.classList.remove('theme-revealing'); release(); });
-      } else if(document.body.animate){
-        veilSwap(next, release);
-      } else { flipTheme(next); release(); }
+      // a panel switch still playing keeps a view-transition overlay above the page; settle it so the wipe is visible
+      if(activeVT && activeVT.skipTransition){ try{ activeVT.skipTransition(); }catch(err){} }
+      if(document.body.animate){ veilSwap(next, release); }
+      else { flipTheme(next); release(); }
     });
   }
   // keep following the phone's system theme live, unless the person manually toggled it
@@ -3063,9 +3062,7 @@
     var themeMedia = window.matchMedia('(prefers-color-scheme: light)');
     var onSystemThemeChange = function(e){
       if(themeManuallySet) return;
-      document.documentElement.setAttribute('data-theme', e.matches ? 'light' : 'dark');
-      var active = document.querySelector('.tab.active');
-      if(active) moveIndicator(active);
+      flipTheme(e.matches ? 'light' : 'dark');
     };
     if(themeMedia.addEventListener){ themeMedia.addEventListener('change', onSystemThemeChange); }
     else if(themeMedia.addListener){ themeMedia.addListener(onSystemThemeChange); }
@@ -3403,14 +3400,6 @@
   // Manual list, newest first. type: 'important' | 'offer' | 'update' | 'info'.
   //   { type, hue, isNew, tag, icon, title, summary, points:[{icon,title,text}], note, photo, url }
   var NEWS_POSTS = [
-    { type:'info', hue:'blue', isNew:true, tag:'طرح ویژه', icon:'bolt',
-      title:'سرور آلمان ۱ پنجشنبه‌شب و جمعه‌شب رایگان است',
-      summary:'پنجشنبه‌شب و جمعه‌شب، از ساعت ۲ تا ۷ صبح، سرور آلمان ۱ کاملاً رایگان در اختیار شماست؛ هر مقدار مصرف کنید، هیچ حجمی از اکانت کم نمی‌شود.',
-      points:[{icon:'bolt',title:'ساعت ۲ تا ۷ صبح',text:'فقط پنجشنبه‌شب و جمعه‌شب، در همین ساعات اعلام‌شده.'},
-              {icon:'server',title:'فقط آلمان ۱',text:'سایر سرورها شامل این طرح نیستند. این قوی‌ترین سرور ماست برای دانلودهای حجیم.'},
-              {icon:'info',title:'طرح آزمایشی',text:'برای بررسی عملکرد سرور و بازخورد شما اجرا می‌شود. کیفیت اینترنت خودتان هم روی سرعت دانلود اثر دارد.'}],
-      note:'منتظر نظرات شما هستیم 💙',
-      url:'https://t.me/WaliVPNShop' },
     { type:'important', hue:'orange', isNew:false, tag:'اطلاعیه مهم', icon:'alert',
       title:'هشدار درباره سرورهای ضریب ۳ (تانل)',
       summary:'به سرورهایی که کنارشان «ضریب ۳ (تانل)» نوشته شده، در شرایط عادی وصل نشوید و فقط در شرایط خاص از آن‌ها استفاده کنید.',
