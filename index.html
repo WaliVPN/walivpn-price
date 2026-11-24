@@ -84,6 +84,26 @@
     --purple-soft: rgba(199,42,92,.10);
   }
 
+  /* ---------- Unlimited plan paused (toggle with UNLIMITED_PAUSED in the script) ---------- */
+  .tier-pause{ display:none; }
+  .tier--paused{ position:relative; }
+  .tier--paused .tier-meta, .tier--paused .badge-row, .tier--paused .unlimited-list,
+  .tier--paused .tier-guide, .tier--paused .tier-test-cta{
+    filter: blur(6px) saturate(.6); opacity:.5; pointer-events:none; user-select:none; -webkit-user-select:none;
+  }
+  .tier--paused .tier-pause{
+    display:block; position:absolute; z-index:2; top:96px; right:16px; left:16px;
+    padding:18px 16px; text-align:center; border-radius:16px;
+    background: var(--surface); border:1px solid var(--line);
+    box-shadow: 0 10px 34px rgba(0,0,0,.22);
+  }
+  .tier-pause-icon{ display:inline-flex; width:38px; height:38px; margin-bottom:8px; align-items:center; justify-content:center;
+    border-radius:50%; background: var(--tone-soft); color: var(--tone); }
+  .tier-pause-icon svg{ width:20px; height:20px; }
+  .tier-pause-title{ font-size:15px; font-weight:800; color: var(--text); line-height:1.8; }
+  .tier-pause-sub{ margin-top:2px; font-size:12.5px; color: var(--text-dim); line-height:1.9; }
+  .freetest-option:disabled{ opacity:.45; cursor:not-allowed; filter:saturate(.5); }
+
   /* ---------- Theme switch: soft dip ----------
      A translucent veil in the incoming theme's colour fades in, the theme flips underneath it, and the veil fades out.
      Opacity only (GPU, no page snapshot), and the page never goes fully blank. */
@@ -2346,6 +2366,11 @@
           <span class="tier-name">سرویس نامحدود</span>
           <span class="tier-dot"></span>
         </div>
+        <div class="tier-pause" role="status">
+          <span class="tier-pause-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg></span>
+          <p class="tier-pause-title">به دلیل اختلال‌های این چند وقت اخیر، فعلاً فروشی نداریم</p>
+          <p class="tier-pause-sub">سرویس نامحدود موقتاً در دسترس نیست.</p>
+        </div>
         <div class="tier-meta">۳ گزینه · بدون محدودیت حجم · اعتبار ۳۰ روز</div>
         <div class="badge-row">
           <div class="quality-badge">
@@ -2999,6 +3024,27 @@
     var active = document.querySelector('.tab.active');
     if(active) moveIndicator(active);
   });
+  // ---------- unlimited plan on hold ----------
+  // Set to false when the unlimited service goes back on sale: the blur, the notice and the disabled buttons all go away.
+  var UNLIMITED_PAUSED = true;
+  (function applyUnlimitedPause(){
+    var tier = document.getElementById('tier-purple');
+    if(!tier) return;
+    tier.classList.toggle('tier--paused', UNLIMITED_PAUSED);
+    ['.tier-meta', '.badge-row', '.unlimited-list', '.tier-guide', '.tier-test-cta'].forEach(function(sel){
+      var el = tier.querySelector(sel);
+      if(!el) return;
+      if(UNLIMITED_PAUSED){ el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+      else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+    });
+    var ft = document.getElementById('freetestUnlimited');
+    if(ft){
+      ft.disabled = UNLIMITED_PAUSED;
+      var sub = ft.querySelector('.freetest-option-sub');
+      if(sub && UNLIMITED_PAUSED) sub.textContent = 'فعلاً فروشی نداریم';
+    }
+  })();
+
   // ---------- theme toggle ----------
   var themeToggleBtn = document.getElementById('themeToggle');
   var themeManuallySet = false;
